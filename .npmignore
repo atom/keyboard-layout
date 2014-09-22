@@ -1,6 +1,6 @@
 spec
 script
-src
+src/keyboard-layout.coffee
 *.coffee
 .npmignore
 .DS_Store
