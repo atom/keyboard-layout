@@ -2,7 +2,7 @@
 {KeyboardLayoutObserver} = require('../build/Release/keyboard-layout-observer.node')
 
 emitter = new Emitter
-observer = new KeyboardLayoutObserver -> emitter.emit 'did-change-current-keyboard-layout'
+observer = new KeyboardLayoutObserver -> emitter.emit 'did-change-current-keyboard-layout', getCurrentKeyboardLayout()
 
 getCurrentKeyboardLayout = ->
   observer.getCurrentKeyboardLayout()
