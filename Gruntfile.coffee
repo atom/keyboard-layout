@@ -6,21 +6,17 @@ module.exports = (grunt) ->
       glob_to_multiple:
         expand: true
         cwd: 'src'
-        src: ['**/*.coffee']
+        src: ['*.coffee']
         dest: 'lib'
         ext: '.js'
 
     coffeelint:
       options:
-        no_empty_param_list:
-          level: 'error'
         max_line_length:
           level: 'ignore'
-        indentation:
-          level: 'ignore'
 
-      src: ['src/*.coffee']
-      test: ['spec/*.coffee']
+      src: ['src/**/*.coffee']
+      test: ['spec/**/*.coffee']
       gruntfile: ['Gruntfile.coffee']
 
     shell:
