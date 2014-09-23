@@ -40,5 +40,5 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanScope();
-  NanUndefined();
+  NanReturnValue(NanUndefined());
 }
