@@ -39,7 +39,7 @@ static void asyncSendHandler(uv_async_t *handle) {
 }
 
 KeyboardLayoutObserver::KeyboardLayoutObserver(NanCallback *callback) : callback(callback) {
-  uv_async_init(loop, &async, asyncSendHandler);
+  uv_async_init(loop, &async, (uv_async_cb) asyncSendHandler);
 
   CFNotificationCenterAddObserver(
       CFNotificationCenterGetDistributedCenter(),
