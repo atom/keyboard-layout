@@ -45,7 +45,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   char layoutName[KL_NAMELENGTH];
   GetKeyboardLayoutName(layoutName);
 
-  if (::GetKeyboardLayoutNameW(mCurrentLocaleName))
+  if (::GetKeyboardLayoutNameW(layoutName))
     NanReturnValue(NanUndefined(NanNew<String>(layoutName)));
   else
     NanReturnValue(NanUndefined());
