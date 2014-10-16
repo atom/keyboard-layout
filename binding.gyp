@@ -16,7 +16,7 @@
         }],  # OS=="mac"
         ['OS=="win"', {
           "sources": [
-            "src/keyboard-layout-observer-non-mac.cc",
+            "src/keyboard-layout-observer-windows.cc",
           ],
           'msvs_settings': {
             'VCCLCompilerTool': {
