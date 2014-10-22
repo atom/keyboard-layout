@@ -1,4 +1,5 @@
 #include "keyboard-layout-observer.h"
+#include <windows.h>
 
 using namespace v8;
 
@@ -37,5 +38,10 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanScope();
-  NanReturnValue(NanUndefined());
+
+  char layoutName[KL_NAMELENGTH];
+  if (::GetKeyboardLayoutName(layoutName))
+    NanReturnValue(NanNew<String>(layoutName));
+  else
+    NanReturnValue(NanUndefined());
 }
