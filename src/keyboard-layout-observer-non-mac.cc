@@ -25,9 +25,6 @@ NAN_METHOD(KeyboardLayoutObserver::New) {
   NanReturnUndefined();
 }
 
-uv_loop_t *loop = uv_default_loop();
-uv_async_t async;
-
 KeyboardLayoutObserver::KeyboardLayoutObserver(NanCallback *callback) : callback(callback) {
 }
 
