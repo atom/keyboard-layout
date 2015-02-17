@@ -84,10 +84,8 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
       TISInputSourceRef current = (TISInputSourceRef)[keyboardLayouts objectAtIndex:i];
 
       NSArray* langs = (NSArray*) TISGetInputSourceProperty(current, kTISPropertyInputSourceLanguages);
-      for (size_t j=0; j < 1; j++) {
-        std::string str = std::string([(NSString*)[langs objectAtIndex:j] UTF8String]);
-        ret.push_back(str);
-      }
+      std::string str = std::string([(NSString*)[langs objectAtIndex:0] UTF8String]);
+      ret.push_back(str);
     }
 
     filter = @{ (__bridge NSString *) kTISPropertyInputSourceType : (__bridge NSString *) kTISTypeKeyboardInputMode };
@@ -97,10 +95,8 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
       TISInputSourceRef current = (TISInputSourceRef)[keyboardLayouts objectAtIndex:i];
 
       NSArray* langs = (NSArray*) TISGetInputSourceProperty(current, kTISPropertyInputSourceLanguages);
-      for (size_t j=0; j < 1; j++) {
-        std::string str = std::string([(NSString*)[langs objectAtIndex:j] UTF8String]);
-        ret.push_back(str);
-      }
+      std::string str = std::string([(NSString*)[langs objectAtIndex:0] UTF8String]);
+      ret.push_back(str);
     }
 
     Local<Array> result = NanNew<Array>(ret.size());
