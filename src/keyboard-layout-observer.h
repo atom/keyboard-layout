@@ -15,7 +15,8 @@ class KeyboardLayoutObserver : public node::ObjectWrap {
   ~KeyboardLayoutObserver();
   static NAN_METHOD(New);
   static NAN_METHOD(GetCurrentKeyboardLayout);
-  static NAN_METHOD(GetInstalledKeyboardLayouts);
+  static NAN_METHOD(GetCurrentKeyboardLanguage);
+  static NAN_METHOD(GetInstalledKeyboardLanguages);
 
   NanCallback *callback;
 };

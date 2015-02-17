@@ -17,7 +17,8 @@ void KeyboardLayoutObserver::Init(Handle<Object> target) {
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
   NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
-  NODE_SET_METHOD(proto, "getInstalledKeyboardLayouts", KeyboardLayoutObserver::GetInstalledKeyboardLayouts);
+  NODE_SET_METHOD(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
+  NODE_SET_METHOD(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
 
   target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
 }
@@ -68,7 +69,7 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
   callback->Call(0, NULL);
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
+NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
   NanScope();
 
   @autoreleasepool {
@@ -110,6 +111,16 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
 
     NanReturnValue(result);
   }
+}
+
+NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
+  NanScope();
+  TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
+
+  NSArray* langs = (NSArray*) TISGetInputSourceProperty(source, kTISPropertyInputSourceLanguages);
+  NSString* lang = (NSString*) [langs objectAtIndex:0];
+
+  NanReturnValue(NanNew<String>([lang UTF8String]));
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
