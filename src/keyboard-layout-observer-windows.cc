@@ -83,9 +83,36 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanScope();
 
-  char layoutName[KL_NAMELENGTH];
-  if (::GetKeyboardLayoutName(layoutName))
-    NanReturnValue(NanNew(layoutName));
-  else
-    NanReturnValue(NanUndefined());
+  HKL layout = GetKeyboardLayout(0 /* Current Thread */);
+
+  wchar_t buf[LOCALE_NAME_MAX_LENGTH];
+  std::wstring wstr;
+  LCIDToLocaleName(MAKELCID((UINT)layout, SORT_DEFAULT), buf, LOCALE_NAME_MAX_LENGTH, 0);
+  wstr.assign(buf);
+
+  std::string str = ToUTF8(wstr);
+  NanReturnValue(NanNew<String>(str.data(), str.size()));
+}
+
+NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
+  NanScope();
+
+  int layoutCount = GetKeyboardLayoutList(0, NULL);
+  HKL* layouts = new HKL[layoutCount];
+  GetKeyboardLayoutList(layoutCount, layouts);
+
+  Local<Array> result = NanNew<Array>(layoutCount);
+  wchar_t buf[LOCALE_NAME_MAX_LENGTH];
+
+  for (int i=0; i < layoutCount; i++) {
+    std::wstring wstr;
+    LCIDToLocaleName(MAKELCID((UINT)layouts[i], SORT_DEFAULT), buf, LOCALE_NAME_MAX_LENGTH, 0);
+    wstr.assign(buf);
+
+    std::string str = ToUTF8(wstr);
+    result->Set(i, NanNew<String>(str.data(), str.size()));
+  }
+
+  delete[] layouts;
+  NanReturnValue(result);
 }
