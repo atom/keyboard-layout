@@ -8,7 +8,15 @@ getCurrentKeyboardLayout = ->
   observer.getCurrentKeyboardLayout()
 
 getInstalledKeyboardLayouts = ->
-  observer.getInstalledKeyboardLayouts()
+  rawList = observer.getInstalledKeyboardLayouts()
+
+  ret = []
+  console.log JSON.stringify(rawList)
+  for item in rawList
+    continue if ret.indexOf(item) >= 0
+    ret.push(item)
+
+  ret
 
 onDidChangeCurrentKeyboardLayout = (callback) ->
   emitter.on 'did-change-current-keyboard-layout', callback

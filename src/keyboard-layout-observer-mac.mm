@@ -1,5 +1,10 @@
+#import <Cocoa/Cocoa.h>
+#import <dispatch/dispatch.h>
+
 #import <Carbon/Carbon.h>
 #import "keyboard-layout-observer.h"
+#include <vector>
+#include <string>
 
 using namespace v8;
 
@@ -8,8 +13,12 @@ void KeyboardLayoutObserver::Init(Handle<Object> target) {
   Local<FunctionTemplate> newTemplate = NanNew<FunctionTemplate>(KeyboardLayoutObserver::New);
   newTemplate->SetClassName(NanNew<String>("KeyboardLayoutObserver"));
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
+
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
+
   NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
+  NODE_SET_METHOD(proto, "getInstalledKeyboardLayouts", KeyboardLayoutObserver::GetInstalledKeyboardLayouts);
+
   target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
 }
 
@@ -57,6 +66,50 @@ KeyboardLayoutObserver::~KeyboardLayoutObserver() {
 
 void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
   callback->Call(0, NULL);
+}
+
+NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
+  NanScope();
+
+  @autoreleasepool {
+    std::vector<std::string> ret;
+
+    // NB: We have to do this whole rigamarole twice, once for IMEs (i.e.
+    // Japanese), and once for keyboard layouts (i.e. English).
+    NSDictionary* filter = @{ (__bridge NSString *) kTISPropertyInputSourceType : (__bridge NSString *) kTISTypeKeyboardLayout };
+    NSArray* keyboardLayouts = (NSArray *) TISCreateInputSourceList((__bridge CFDictionaryRef) filter, NO);
+
+    for (size_t i=0; i < keyboardLayouts.count; i++) {
+      TISInputSourceRef current = (TISInputSourceRef)[keyboardLayouts objectAtIndex:i];
+
+      NSArray* langs = (NSArray*) TISGetInputSourceProperty(current, kTISPropertyInputSourceLanguages);
+      for (size_t j=0; j < 1; j++) {
+        std::string str = std::string([(NSString*)[langs objectAtIndex:j] UTF8String]);
+        ret.push_back(str);
+      }
+    }
+
+    filter = @{ (__bridge NSString *) kTISPropertyInputSourceType : (__bridge NSString *) kTISTypeKeyboardInputMode };
+    keyboardLayouts = (NSArray *) TISCreateInputSourceList((__bridge CFDictionaryRef) filter, NO);
+
+    for (size_t i=0; i < keyboardLayouts.count; i++) {
+      TISInputSourceRef current = (TISInputSourceRef)[keyboardLayouts objectAtIndex:i];
+
+      NSArray* langs = (NSArray*) TISGetInputSourceProperty(current, kTISPropertyInputSourceLanguages);
+      for (size_t j=0; j < 1; j++) {
+        std::string str = std::string([(NSString*)[langs objectAtIndex:j] UTF8String]);
+        ret.push_back(str);
+      }
+    }
+
+    Local<Array> result = NanNew<Array>(ret.size());
+    for (size_t i = 0; i < ret.size(); ++i) {
+       const std::string& lang = ret[i];
+       result->Set(i, NanNew<String>(lang.data(), lang.size()));
+     }
+
+    NanReturnValue(result);
+  }
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
