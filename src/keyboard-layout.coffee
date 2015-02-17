@@ -7,11 +7,13 @@ observer = new KeyboardLayoutObserver -> emitter.emit 'did-change-current-keyboa
 getCurrentKeyboardLayout = ->
   observer.getCurrentKeyboardLayout()
 
-getInstalledKeyboardLayouts = ->
-  rawList = observer.getInstalledKeyboardLayouts()
+getCurrentKeyboardLanguage = ->
+  observer.getCurrentKeyboardLanguage()
+
+getInstalledKeyboardLanguages = ->
+  rawList = observer.getInstalledKeyboardLanguages()
 
   ret = []
-  console.log JSON.stringify(rawList)
   for item in rawList
     continue if ret.indexOf(item) >= 0
     ret.push(item)
@@ -25,4 +27,4 @@ observeCurrentKeyboardLayout = (callback) ->
   callback(getCurrentKeyboardLayout())
   onDidChangeCurrentKeyboardLayout(callback)
 
-module.exports = {getCurrentKeyboardLayout, getInstalledKeyboardLayouts, onDidChangeCurrentKeyboardLayout, observeCurrentKeyboardLayout}
+module.exports = {getCurrentKeyboardLayout, getCurrentKeyboardLanguage, getInstalledKeyboardLanguages, onDidChangeCurrentKeyboardLayout, observeCurrentKeyboardLayout}
