@@ -11,6 +11,10 @@ getCurrentKeyboardLanguage = ->
   observer.getCurrentKeyboardLanguage()
 
 getInstalledKeyboardLanguages = ->
+  # NB: This method returns one language per input method, and users can have
+  # >1 layout that matches a given language (i.e. Japanese probably has Hiragana
+  # and Katakana, both would correspond to the language "ja"), so we need to
+  # dedupe this list.
   rawList = observer.getInstalledKeyboardLanguages()
 
   ret = []
