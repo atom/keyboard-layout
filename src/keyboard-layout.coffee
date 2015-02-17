@@ -7,6 +7,9 @@ observer = new KeyboardLayoutObserver -> emitter.emit 'did-change-current-keyboa
 getCurrentKeyboardLayout = ->
   observer.getCurrentKeyboardLayout()
 
+getInstalledKeyboardLayouts = ->
+  observer.getInstalledKeyboardLayouts()
+
 onDidChangeCurrentKeyboardLayout = (callback) ->
   emitter.on 'did-change-current-keyboard-layout', callback
 
@@ -14,4 +17,4 @@ observeCurrentKeyboardLayout = (callback) ->
   callback(getCurrentKeyboardLayout())
   onDidChangeCurrentKeyboardLayout(callback)
 
-module.exports = {getCurrentKeyboardLayout, onDidChangeCurrentKeyboardLayout, observeCurrentKeyboardLayout}
+module.exports = {getCurrentKeyboardLayout, getInstalledKeyboardLayouts, onDidChangeCurrentKeyboardLayout, observeCurrentKeyboardLayout}
