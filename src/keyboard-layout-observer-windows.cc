@@ -51,7 +51,9 @@ void KeyboardLayoutObserver::Init(Handle<Object> target) {
   newTemplate->SetClassName(NanNew<String>("KeyboardLayoutObserver"));
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
+
   NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
+  NODE_SET_METHOD(proto, "getInstalledKeyboardLayouts", KeyboardLayoutObserver::GetInstalledKeyboardLayouts);
   target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
 }
 
