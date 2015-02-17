@@ -53,7 +53,8 @@ void KeyboardLayoutObserver::Init(Handle<Object> target) {
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
   NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
-  NODE_SET_METHOD(proto, "getInstalledKeyboardLayouts", KeyboardLayoutObserver::GetInstalledKeyboardLayouts);
+  NODE_SET_METHOD(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
+  NODE_SET_METHOD(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
   target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
 }
 
@@ -83,6 +84,16 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanScope();
 
+  char layoutName[KL_NAMELENGTH];
+  if (::GetKeyboardLayoutName(layoutName))
+    NanReturnValue(NanNew(layoutName));
+  else
+    NanReturnValue(NanUndefined());
+}
+
+NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
+  NanScope();
+
   HKL layout = GetKeyboardLayout(0 /* Current Thread */);
 
   wchar_t buf[LOCALE_NAME_MAX_LENGTH];
@@ -94,7 +105,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanReturnValue(NanNew<String>(str.data(), str.size()));
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
+NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
   NanScope();
 
   int layoutCount = GetKeyboardLayoutList(0, NULL);
