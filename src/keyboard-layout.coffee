@@ -15,14 +15,10 @@ getInstalledKeyboardLanguages = ->
   # >1 layout that matches a given language (i.e. Japanese probably has Hiragana
   # and Katakana, both would correspond to the language "ja"), so we need to
   # dedupe this list.
-  rawList = observer.getInstalledKeyboardLanguages()
-
-  ret = []
-  for item in rawList
-    continue if ret.indexOf(item) >= 0
-    ret.push(item)
-
-  ret
+  languages = {}
+  for language in observer.getInstalledKeyboardLanguages()
+    languages[language] = true
+  Object.keys(languages)
 
 onDidChangeCurrentKeyboardLayout = (callback) ->
   emitter.on 'did-change-current-keyboard-layout', callback
