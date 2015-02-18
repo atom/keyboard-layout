@@ -39,10 +39,10 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanScope();
-  NanReturnValue(NanUndefined());
+  NanReturnUndefined();
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
   NanScope();
-  NanReturnValue(NanUndefined());
+  NanReturnUndefined();
 }
