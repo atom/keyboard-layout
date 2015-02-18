@@ -103,7 +103,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
     for (size_t i = 0; i < ret.size(); ++i) {
        const std::string& lang = ret[i];
        result->Set(i, NanNew<String>(lang.data(), lang.size()));
-     }
+    }
 
     NanReturnValue(result);
   }
