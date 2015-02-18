@@ -1,4 +1,4 @@
-# keyboard-layout
+# keyboard-layout [![Build Status](https://travis-ci.org/atom/keyboard-layout.svg?branch=master)](https://travis-ci.org/atom/keyboard-layout)
 
 Read and observe the current keyboard layout on OS X.
 
