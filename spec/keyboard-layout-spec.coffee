@@ -17,3 +17,9 @@ describe "Keyboard Layout", ->
       layout = callback.argsForCall[0][0]
       expect(typeof layout).toBe 'string'
       expect(layout.length).toBeGreaterThan 0
+
+  describe ".getCurrentKeyboardLanguage()", ->
+    it "returns the current keyboard language", ->
+      language = KeyboardLayout.getCurrentKeyboardLanguage()
+      expect(typeof language).toBe 'string'
+      expect(language.length).toBeGreaterThan 0
