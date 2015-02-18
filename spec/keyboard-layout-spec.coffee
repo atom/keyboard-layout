@@ -23,3 +23,13 @@ describe "Keyboard Layout", ->
       language = KeyboardLayout.getCurrentKeyboardLanguage()
       expect(typeof language).toBe 'string'
       expect(language.length).toBeGreaterThan 0
+
+  describe ".getInstalledKeyboardLanguages()", ->
+    it "returns an array of string keyboard languages", ->
+      languages = KeyboardLayout.getInstalledKeyboardLanguages()
+      expect(Array.isArray(languages)).toBe true
+      expect(languages.length).toBeGreaterThan 0
+
+      for language in languages
+        expect(typeof language).toBe 'string'
+        expect(language.length).toBeGreaterThan 0
