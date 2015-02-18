@@ -116,7 +116,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   NSArray* langs = (NSArray*) TISGetInputSourceProperty(source, kTISPropertyInputSourceLanguages);
   NSString* lang = (NSString*) [langs objectAtIndex:0];
 
-  NanReturnValue(NanNew<String>([lang UTF8String]));
+  NanReturnValue(NanNew([lang UTF8String]));
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
