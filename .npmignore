@@ -6,6 +6,7 @@ src/keyboard-layout.coffee
 .DS_Store
 npm-debug.log
 .travis.yml
+appveyor.yml
 .pairs
 .coffee
 build/
