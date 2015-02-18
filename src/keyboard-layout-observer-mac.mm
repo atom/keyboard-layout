@@ -123,5 +123,5 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanScope();
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
   CFStringRef sourceId = (CFStringRef) TISGetInputSourceProperty(source, kTISPropertyInputSourceID);
-  NanReturnValue(NanNew<String>([(NSString *)sourceId UTF8String]));
+  NanReturnValue(NanNew([(NSString *)sourceId UTF8String]));
 }
