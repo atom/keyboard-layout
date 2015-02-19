@@ -28,23 +28,6 @@ std::string ToUTF8(const std::wstring& string) {
   return ret;
 }
 
-std::wstring ToWString(const std::string& string) {
-  if (string.length() < 1) {
-    return std::wstring();
-  }
-
-  // NB: If you got really unlucky, every character could be a two-wchar_t
-  // surrogate pair
-  int cchLen = (string.length()+1) * 2;
-  wchar_t* buf = new wchar_t[cchLen];
-  int retLen = MultiByteToWideChar(CP_UTF8, 0, string.c_str(), strlen(string.c_str()), buf, cchLen);
-  buf[retLen] = 0;
-
-  std::wstring ret;
-  ret.assign(buf);
-  return ret;
-}
-
 void KeyboardLayoutObserver::Init(Handle<Object> target) {
   NanScope();
   Local<FunctionTemplate> newTemplate = NanNew<FunctionTemplate>(KeyboardLayoutObserver::New);
