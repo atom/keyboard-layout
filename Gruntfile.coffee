@@ -1,4 +1,7 @@
 module.exports = (grunt) ->
+  testCommand = 'node node_modules/jasmine-focused/bin/jasmine-focused --coffee --captureExceptions spec'
+  testCommand += ' --forceexit' if process.platform is 'darwin'
+
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
 
@@ -28,7 +31,7 @@ module.exports = (grunt) ->
           failOnError: true
 
       test:
-        command: 'node node_modules/jasmine-focused/bin/jasmine-focused --coffee --captureExceptions --forceexit spec'
+        command: testCommand
         options:
           stdout: true
           stderr: true
