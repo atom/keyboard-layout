@@ -28,7 +28,10 @@ describe "Keyboard Layout", ->
     it "returns an array of string keyboard languages", ->
       languages = KeyboardLayout.getInstalledKeyboardLanguages()
       expect(Array.isArray(languages)).toBe true
-      expect(languages.length).toBeGreaterThan 0
+
+      # Keyboard languages do not appear to be available on AppVeyor
+      unless process.platform is 'win32' and process.env.CI
+        expect(languages.length).toBeGreaterThan 0
 
       for language in languages
         expect(typeof language).toBe 'string'
