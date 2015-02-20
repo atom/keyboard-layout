@@ -89,7 +89,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
 
   wchar_t buf[LOCALE_NAME_MAX_LENGTH];
   std::wstring wstr;
-  LCIDToLocaleName(MAKELCID((UINT)layout, SORT_DEFAULT), buf, LOCALE_NAME_MAX_LENGTH, 0);
+  LCIDToLocaleName(MAKELCID((UINT)layout & 0xFFFF, SORT_DEFAULT), buf, LOCALE_NAME_MAX_LENGTH, 0);
   wstr.assign(buf);
 
   std::string str = ToUTF8(wstr);
@@ -108,7 +108,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
 
   for (int i=0; i < layoutCount; i++) {
     std::wstring wstr;
-    LCIDToLocaleName(MAKELCID((UINT)layouts[i], SORT_DEFAULT), buf, LOCALE_NAME_MAX_LENGTH, 0);
+    LCIDToLocaleName(MAKELCID((UINT)layouts[i] & 0xFFFF, SORT_DEFAULT), buf, LOCALE_NAME_MAX_LENGTH, 0);
     wstr.assign(buf);
 
     std::string str = ToUTF8(wstr);
