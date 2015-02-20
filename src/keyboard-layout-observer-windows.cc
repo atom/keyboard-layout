@@ -77,7 +77,15 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   NanScope();
 
-  HKL layout = GetKeyboardLayout(0 /* Current Thread */);
+  HKL layout;
+  DWORD dwThreadId = 0;
+  HWND hWnd = GetForegroundWindow();
+
+  if (hWnd != NULL) {
+    dwThreadId = GetWindowThreadProcessId(hWnd, NULL);
+  }
+
+  layout = GetKeyboardLayout(dwThreadId);
 
   wchar_t buf[LOCALE_NAME_MAX_LENGTH];
   std::wstring wstr;
