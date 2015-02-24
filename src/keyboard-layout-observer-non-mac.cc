@@ -10,7 +10,7 @@ void KeyboardLayoutObserver::Init(Handle<Object> target) {
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
   NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
   NODE_SET_METHOD(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLayout); // NB:  Intentionally mapped to same stub
-  NODE_SET_METHOD(proto, "getInstalledKeyboardLayouts", KeyboardLayoutObserver::GetInstalledKeyboardLayouts);
+  NODE_SET_METHOD(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
   target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
 }
 
@@ -42,7 +42,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   NanReturnUndefined();
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLayouts) {
+NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
   NanScope();
   NanReturnUndefined();
 }
