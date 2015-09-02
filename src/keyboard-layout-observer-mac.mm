@@ -9,31 +9,31 @@
 using namespace v8;
 
 void KeyboardLayoutObserver::Init(Handle<Object> target) {
-  NanScope();
-  Local<FunctionTemplate> newTemplate = NanNew<FunctionTemplate>(KeyboardLayoutObserver::New);
-  newTemplate->SetClassName(NanNew<String>("KeyboardLayoutObserver"));
+  Nan::HandleScope scope;
+  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutObserver::New);
+  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
-  NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
-  NODE_SET_METHOD(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
-  NODE_SET_METHOD(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
+  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
+  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
+  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
 
-  target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
+  target->Set(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked(), newTemplate->GetFunction());
 }
 
 NODE_MODULE(keyboard_layout_observer, KeyboardLayoutObserver::Init)
 
 NAN_METHOD(KeyboardLayoutObserver::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Local<Function> callbackHandle = args[0].As<Function>();
-  NanCallback *callback = new NanCallback(callbackHandle);
+  Local<Function> callbackHandle = info[0].As<Function>();
+  Nan::Callback *callback = new Nan::Callback(callbackHandle);
 
   KeyboardLayoutObserver *observer = new KeyboardLayoutObserver(callback);
-  observer->Wrap(args.This());
-  NanReturnUndefined();
+  observer->Wrap(info.This());
+  return;
 }
 
 uv_loop_t *loop = uv_default_loop();
@@ -48,7 +48,7 @@ static void asyncSendHandler(uv_async_t *handle) {
   (static_cast<KeyboardLayoutObserver *>(handle->data))->HandleKeyboardLayoutChanged();
 }
 
-KeyboardLayoutObserver::KeyboardLayoutObserver(NanCallback *callback) : callback(callback) {
+KeyboardLayoutObserver::KeyboardLayoutObserver(Nan::Callback *callback) : callback(callback) {
   uv_async_init(loop, &async, (uv_async_cb) asyncSendHandler);
 
   CFNotificationCenterAddObserver(
@@ -70,7 +70,7 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
-  NanScope();
+  Nan::HandleScope scope;
 
   @autoreleasepool {
     std::vector<std::string> ret;
@@ -99,29 +99,29 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
       ret.push_back(str);
     }
 
-    Local<Array> result = NanNew<Array>(ret.size());
+    Local<Array> result = Nan::New<Array>(ret.size());
     for (size_t i = 0; i < ret.size(); ++i) {
        const std::string& lang = ret[i];
-       result->Set(i, NanNew<String>(lang.data(), lang.size()));
+       result->Set(i, Nan::New<String>(lang.data(), lang.size())).ToLocalChecked();
     }
 
-    NanReturnValue(result);
+    info.GetReturnValue().Set(result);
   }
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
-  NanScope();
+  Nan::HandleScope scope;
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
 
   NSArray* langs = (NSArray*) TISGetInputSourceProperty(source, kTISPropertyInputSourceLanguages);
   NSString* lang = (NSString*) [langs objectAtIndex:0];
 
-  NanReturnValue(NanNew([lang UTF8String]));
+  info.GetReturnValue().Set(Nan::New([lang UTF8String]));
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
-  NanScope();
+  Nan::HandleScope scope;
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
   CFStringRef sourceId = (CFStringRef) TISGetInputSourceProperty(source, kTISPropertyInputSourceID);
-  NanReturnValue(NanNew([(NSString *)sourceId UTF8String]));
+  info.GetReturnValue().Set(Nan::New([(NSString *)sourceId UTF8String]));
 }
