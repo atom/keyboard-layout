@@ -102,7 +102,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
     Local<Array> result = Nan::New<Array>(ret.size());
     for (size_t i = 0; i < ret.size(); ++i) {
        const std::string& lang = ret[i];
-       result->Set(i, Nan::New<String>(lang.data(), lang.size())).ToLocalChecked();
+       result->Set(i, Nan::New<String>(lang.data(), lang.size()).ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -116,12 +116,12 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   NSArray* langs = (NSArray*) TISGetInputSourceProperty(source, kTISPropertyInputSourceLanguages);
   NSString* lang = (NSString*) [langs objectAtIndex:0];
 
-  info.GetReturnValue().Set(Nan::New([lang UTF8String]));
+  info.GetReturnValue().Set(Nan::New([lang UTF8String]).ToLocalChecked());
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
   Nan::HandleScope scope;
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
   CFStringRef sourceId = (CFStringRef) TISGetInputSourceProperty(source, kTISPropertyInputSourceID);
-  info.GetReturnValue().Set(Nan::New([(NSString *)sourceId UTF8String]));
+  info.GetReturnValue().Set(Nan::New([(NSString *)sourceId UTF8String]).ToLocalChecked());
 }
