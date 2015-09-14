@@ -1,6 +1,6 @@
 {
   "name": "keyboard-layout",
-  "version": "0.12.0",
+  "version": "1.0.0",
   "description": "Read and observe the current keyboard layout on OS X.",
   "main": "./lib/keyboard-layout",
   "scripts": {
