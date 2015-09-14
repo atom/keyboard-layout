@@ -69,7 +69,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
 
   char layoutName[KL_NAMELENGTH];
   if (::GetKeyboardLayoutName(layoutName))
-    info.GetReturnValue().Set(Nan::New(layoutName));
+    info.GetReturnValue().Set(Nan::New(layoutName).ToLocalChecked());
   else
     info.GetReturnValue().Set(Nan::Undefined());
 }
@@ -93,7 +93,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   wstr.assign(buf);
 
   std::string str = ToUTF8(wstr);
-  info.GetReturnValue().Set(Nan::New<String>(str.data(), str.size())).ToLocalChecked();
+  info.GetReturnValue().Set(Nan::New<String>(str.data(), str.size()).ToLocalChecked());
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
@@ -112,7 +112,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
     wstr.assign(buf);
 
     std::string str = ToUTF8(wstr);
-    result->Set(i, Nan::New<String>(str.data(), str.size())).ToLocalChecked();
+    result->Set(i, Nan::New<String>(str.data(), str.size()).ToLocalChecked());
   }
 
   delete[] layouts;
