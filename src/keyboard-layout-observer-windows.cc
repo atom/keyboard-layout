@@ -29,32 +29,32 @@ std::string ToUTF8(const std::wstring& string) {
 }
 
 void KeyboardLayoutObserver::Init(Handle<Object> target) {
-  NanScope();
-  Local<FunctionTemplate> newTemplate = NanNew<FunctionTemplate>(KeyboardLayoutObserver::New);
-  newTemplate->SetClassName(NanNew<String>("KeyboardLayoutObserver"));
+  Nan::HandleScope scope;
+  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutObserver::New);
+  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
-  NODE_SET_METHOD(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
-  NODE_SET_METHOD(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
-  NODE_SET_METHOD(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
-  target->Set(NanNew<String>("KeyboardLayoutObserver"), newTemplate->GetFunction());
+  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
+  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
+  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
+  target->Set(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked(), newTemplate->GetFunction());
 }
 
 NODE_MODULE(keyboard_layout_observer, KeyboardLayoutObserver::Init)
 
 NAN_METHOD(KeyboardLayoutObserver::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  Local<Function> callbackHandle = args[0].As<Function>();
-  NanCallback *callback = new NanCallback(callbackHandle);
+  Local<Function> callbackHandle = info[0].As<Function>();
+  Nan::Callback *callback = new Nan::Callback(callbackHandle);
 
   KeyboardLayoutObserver *observer = new KeyboardLayoutObserver(callback);
-  observer->Wrap(args.This());
-  NanReturnUndefined();
+  observer->Wrap(info.This());
+  return;
 }
 
-KeyboardLayoutObserver::KeyboardLayoutObserver(NanCallback *callback) : callback(callback) {
+KeyboardLayoutObserver::KeyboardLayoutObserver(Nan::Callback *callback) : callback(callback) {
 }
 
 KeyboardLayoutObserver::~KeyboardLayoutObserver() {
@@ -65,17 +65,17 @@ void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
-  NanScope();
+  Nan::HandleScope scope;
 
   char layoutName[KL_NAMELENGTH];
   if (::GetKeyboardLayoutName(layoutName))
-    NanReturnValue(NanNew(layoutName));
+    info.GetReturnValue().Set(Nan::New(layoutName).ToLocalChecked());
   else
-    NanReturnValue(NanUndefined());
+    info.GetReturnValue().Set(Nan::Undefined());
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
-  NanScope();
+  Nan::HandleScope scope;
 
   HKL layout;
   DWORD dwThreadId = 0;
@@ -93,17 +93,17 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   wstr.assign(buf);
 
   std::string str = ToUTF8(wstr);
-  NanReturnValue(NanNew<String>(str.data(), str.size()));
+  info.GetReturnValue().Set(Nan::New<String>(str.data(), str.size()).ToLocalChecked());
 }
 
 NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
-  NanScope();
+  Nan::HandleScope scope;
 
   int layoutCount = GetKeyboardLayoutList(0, NULL);
   HKL* layouts = new HKL[layoutCount];
   GetKeyboardLayoutList(layoutCount, layouts);
 
-  Local<Array> result = NanNew<Array>(layoutCount);
+  Local<Array> result = Nan::New<Array>(layoutCount);
   wchar_t buf[LOCALE_NAME_MAX_LENGTH];
 
   for (int i=0; i < layoutCount; i++) {
@@ -112,9 +112,9 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
     wstr.assign(buf);
 
     std::string str = ToUTF8(wstr);
-    result->Set(i, NanNew<String>(str.data(), str.size()));
+    result->Set(i, Nan::New<String>(str.data(), str.size()).ToLocalChecked());
   }
 
   delete[] layouts;
-  NanReturnValue(result);
+  info.GetReturnValue().Set(result);
 }

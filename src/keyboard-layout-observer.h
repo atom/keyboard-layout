@@ -5,20 +5,20 @@
 
 using namespace v8;  // NOLINT
 
-class KeyboardLayoutObserver : public node::ObjectWrap {
+class KeyboardLayoutObserver : public Nan::ObjectWrap {
  public:
   static void Init(Handle<Object> target);
   void HandleKeyboardLayoutChanged();
 
  private:
-  KeyboardLayoutObserver(NanCallback *callback);
+  KeyboardLayoutObserver(Nan::Callback *callback);
   ~KeyboardLayoutObserver();
   static NAN_METHOD(New);
   static NAN_METHOD(GetCurrentKeyboardLayout);
   static NAN_METHOD(GetCurrentKeyboardLanguage);
   static NAN_METHOD(GetInstalledKeyboardLanguages);
 
-  NanCallback *callback;
+  Nan::Callback *callback;
 };
 
 #endif  // SRC_KEYBORD_LAYOUT_OBSERVER_H_
