@@ -4,6 +4,8 @@
 #undef WINVER
 #define WINVER 0x0601
 
+#pragma warning(disable: 4311 4302)
+
 #include "keyboard-layout-observer.h"
 
 #include <string>
