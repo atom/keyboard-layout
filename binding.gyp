@@ -28,8 +28,11 @@
             4018,  # signed/unsigned mismatch
             4244,  # conversion from 'type1' to 'type2', possible loss of data
             4267,  # conversion from 'size_t' to 'type', possible loss of data
+            4302,  # 'type cast': truncation from 'HKL' to 'UINT'
+            4311,  # 'type cast': pointer truncation from 'HKL' to 'UINT'
             4530,  # C++ exception handler used, but unwind semantics are not enabled
             4506,  # no definition for inline function
+            4577,  # 'noexcept' used with no exception handling mode specified
             4996,  # function was declared deprecated
           ],
         }],  # OS=="win"
