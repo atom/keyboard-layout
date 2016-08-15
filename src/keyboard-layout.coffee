@@ -16,7 +16,7 @@ getInstalledKeyboardLanguages = ->
   # and Katakana, both would correspond to the language "ja"), so we need to
   # dedupe this list.
   languages = {}
-  for language in observer.getInstalledKeyboardLanguages()
+  for language in (observer.getInstalledKeyboardLanguages() or [])
     languages[language] = true
   Object.keys(languages)
 
