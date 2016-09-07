@@ -3,6 +3,32 @@
 const KeyboardLayout = require('../lib/keyboard-layout')
 
 describe('Keyboard Layout', () => {
+  describe('.charactersForKeyCode(keyCode)', function () {
+    it('returns characters corresponding to the given DOM 3 keyboard event code based on the current keyboard layout', function () {
+      const currentLayout = KeyboardLayout.getCurrentKeyboardLayout()
+      switch (currentLayout) {
+        case 'com.apple.keylayout.Dvorak':
+          expect(KeyboardLayout.charactersForKeyCode('KeyS')).toEqual({
+            unmodified: 'o',
+            withShift: 'O',
+            withAltGr: 'ø',
+            withShiftAltGr: 'Ø'
+          })
+          break;
+        case 'com.apple.keylayout.US':
+          expect(KeyboardLayout.charactersForKeyCode('KeyS')).toEqual({
+            unmodified: 's',
+            withShift: 'S',
+            withAltGr: 'ß',
+            withShiftAltGr: 'Í'
+          })
+          break;
+        default:
+          throw new Error('No assertion defined for current keyboard layout: ' + currentLayout)
+      }
+    })
+  })
+
   describe('.getCurrentKeyboardLayout()', () => {
     it('returns the current keyboard layout', () => {
       const layout = KeyboardLayout.getCurrentKeyboardLayout()
