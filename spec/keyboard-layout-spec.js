@@ -8,7 +8,7 @@ describe('Keyboard Layout', () => {
       const currentLayout = KeyboardLayout.getCurrentKeyboardLayout()
       switch (currentLayout) {
         case 'com.apple.keylayout.Dvorak':
-          expect(KeyboardLayout.charactersForKeyCode('KeyS')).toEqual({
+          expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
             unmodified: 'o',
             withShift: 'O',
             withAltGr: 'ø',
@@ -16,7 +16,7 @@ describe('Keyboard Layout', () => {
           })
           break;
         case 'com.apple.keylayout.US':
-          expect(KeyboardLayout.charactersForKeyCode('KeyS')).toEqual({
+          expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
             unmodified: 's',
             withShift: 'S',
             withAltGr: 'ß',

@@ -26,11 +26,11 @@ subscription.dispose() // to unsubscribe later
 
 To return characters for various modifier states based on a DOM 3
 `KeyboardEvent.code` value and the current system keyboard layout, use
-`charactersForKeyCode`:
+`getCurrentKeymap()`:
 
 ```js
 const KeyboardLayout = require('keyboard-layout')
-KeyboardLayout.charactersForKeyCode('KeyS')
+KeyboardLayout.getCurrentKeymap()['KeyS']
 /*
 On a US layout, this returns:
 {
