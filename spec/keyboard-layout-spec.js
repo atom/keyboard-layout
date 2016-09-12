@@ -16,6 +16,7 @@ describe('Keyboard Layout', () => {
           })
           break;
         case 'com.apple.keylayout.US':
+        case '00000409': // U.S. English on Windows
           expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
             unmodified: 's',
             withShift: 'S',
