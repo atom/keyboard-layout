@@ -17,6 +17,7 @@ class KeyboardLayoutManager : public Nan::ObjectWrap {
   static NAN_METHOD(GetCurrentKeyboardLayout);
   static NAN_METHOD(GetCurrentKeyboardLanguage);
   static NAN_METHOD(GetInstalledKeyboardLanguages);
+  static NAN_METHOD(GetCurrentKeymap);
 
   Nan::Callback *callback;
 };

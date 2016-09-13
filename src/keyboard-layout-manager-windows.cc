@@ -118,3 +118,7 @@ NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
   delete[] layouts;
   info.GetReturnValue().Set(result);
 }
+
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
+  Nan::ThrowError("getCurrentKeymap is not implemented on Windows");
+}

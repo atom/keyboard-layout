@@ -21,8 +21,7 @@
   ],
   "dependencies": {
     "event-kit": "^1.0.0",
-    "nan": "^2.0.0",
-    "native-keymap": "^0.1.2"
+    "nan": "^2.0.0"
   },
   "devDependencies": {
     "jasmine-focused": "^1.0.4"

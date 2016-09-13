@@ -19,6 +19,7 @@ void KeyboardLayoutManager::Init(Handle<Object> exports, Handle<Object> module) 
   Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
   Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
+  Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
 
   module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
 }
@@ -124,4 +125,82 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
   CFStringRef sourceId = (CFStringRef) TISGetInputSourceProperty(source, kTISPropertyInputSourceID);
   info.GetReturnValue().Set(Nan::New([(NSString *)sourceId UTF8String]).ToLocalChecked());
+}
+
+struct KeycodeMapEntry {
+  UInt16 virtualKeyCode;
+  const char *dom3Code;
+};
+
+#define USB_KEYMAP_DECLARATION static const KeycodeMapEntry keyCodeMap[] =
+#define USB_KEYMAP(usb, evdev, xkb, win, mac, code, id) {mac, code}
+
+#include "keycode_converter_data.inc"
+
+Local<String> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt16 virtualKeyCode, EventModifiers modifiers) {
+  // See https://developer.apple.com/reference/coreservices/1390584-uckeytranslate?language=objc
+  UInt32 modifierKeyState = (modifiers >> 8) & 0xFF;
+  UInt32 deadKeyState = 0;
+  UniChar characters[4] = {0, 0, 0, 0};
+  UniCharCount charCount = 0;
+  OSStatus status = UCKeyTranslate(
+      keyboardLayout,
+      static_cast<UInt16>(virtualKeyCode),
+      kUCKeyActionDown,
+      modifierKeyState,
+      LMGetKbdLast(),
+      kUCKeyTranslateNoDeadKeysBit,
+      &deadKeyState,
+      sizeof(characters) / sizeof(characters[0]),
+      &charCount,
+      characters);
+
+  if (status == noErr) {
+    return Nan::New(static_cast<const uint16_t *>(characters), static_cast<int>(charCount)).ToLocalChecked();
+  } else {
+    return Nan::New("").ToLocalChecked();
+  }
+}
+
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
+  TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
+  CFDataRef layoutData = static_cast<CFDataRef>(TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData));
+
+  if (layoutData == NULL) {
+    Nan::ThrowError("Could not read current keyboard layout");
+    return;
+  }
+
+  Handle<Object> result = Nan::New<Object>();
+
+  const UCKeyboardLayout* keyboardLayout = reinterpret_cast<const UCKeyboardLayout*>(CFDataGetBytePtr(layoutData));
+
+  Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
+  Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
+  Local<String> withOptionKey = Nan::New("withOption").ToLocalChecked();
+  Local<String> withOptionShiftKey = Nan::New("withOptionShift").ToLocalChecked();
+
+  size_t keyCodeMapSize = sizeof(keyCodeMap) / sizeof(keyCodeMap[0]);
+  for (size_t i = 0; i < keyCodeMapSize; i++) {
+    const char *dom3Code = keyCodeMap[i].dom3Code;
+    int virtualKeyCode = keyCodeMap[i].virtualKeyCode;
+    if (dom3Code && virtualKeyCode < 0xffff) {
+      Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
+
+      Local<String> unmodified = CharacterForNativeCode(keyboardLayout, virtualKeyCode, 0);
+      Local<String> withShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit));
+      Local<String> withOption = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << optionKeyBit));
+      Local<String> withOptionShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit) | (1 << optionKeyBit));
+
+      Local<Object> entry = Nan::New<Object>();
+      entry->Set(unmodifiedKey, unmodified);
+      entry->Set(withShiftKey, withShift);
+      entry->Set(withOptionKey, withOption);
+      entry->Set(withOptionShiftKey, withOptionShift);
+
+      result->Set(dom3CodeKey, entry);
+    }
+  }
+
+  info.GetReturnValue().Set(result);
 }

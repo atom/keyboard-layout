@@ -8,6 +8,9 @@
           "sources": [
             "src/keyboard-layout-manager-mac.mm",
           ],
+          "include_dirs": [
+            "chrome_headers",
+          ],
           "link_settings": {
             "libraries": [
               "-framework", "AppKit"

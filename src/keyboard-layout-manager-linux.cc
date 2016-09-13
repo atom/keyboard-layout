@@ -46,3 +46,7 @@ NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
   Nan::HandleScope scope;
   return;
 }
+
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
+  Nan::ThrowError("getCurrentKeymap is not implemented on Linux");
+}

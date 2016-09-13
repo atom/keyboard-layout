@@ -3,7 +3,7 @@
 const KeyboardLayout = require('../lib/keyboard-layout')
 
 describe('Keyboard Layout', () => {
-  describe('.charactersForKeyCode(keyCode)', function () {
+  describe('.getCurrentKeymap()', function () {
     it('returns characters corresponding to the given DOM 3 keyboard event code based on the current keyboard layout', function () {
       const currentLayout = KeyboardLayout.getCurrentKeyboardLayout()
       switch (currentLayout) {
@@ -11,17 +11,16 @@ describe('Keyboard Layout', () => {
           expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
             unmodified: 'o',
             withShift: 'O',
-            withAltGr: 'ø',
-            withShiftAltGr: 'Ø'
+            withOption: 'ø',
+            withOptionShift: 'Ø'
           })
           break;
         case 'com.apple.keylayout.US':
-        case '00000409': // U.S. English on Windows
           expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
             unmodified: 's',
             withShift: 'S',
-            withAltGr: 'ß',
-            withShiftAltGr: 'Í'
+            withOption: 'ß',
+            withOptionShift: 'Í'
           })
           break;
         default:
