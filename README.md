@@ -6,19 +6,38 @@ To get the current keyboard layout, call `getCurrentKeyboardLayout`. It returns
 the string identifier of the current layout based on the value returned by the
 operating system.
 
-```coffee
-{getCurrentKeyboardLayout} = require 'keyboard-layout'
-getCurrentKeyboardLayout() # => "com.apple.keylayout.Dvorak"
+```js
+const KeyboardLayout = require('keyboard-layout')
+KeyboardLayout.getCurrentKeyboardLayout() // => "com.apple.keylayout.Dvorak"
 ```
 
 If you want to watch for layout changes, use `onDidChangeCurrentKeyboardLayout`
 or `observeCurrentKeyboardLayout`. They work the same, except
 `observeCurrentKeyboardLayout` invokes the given callback immediately with the
 current layout value and then again next time it changes, whereas
-`onDidChangeCurrentKeyboardLayout` only invokes the callback on the next change.
+`onDidChangeCurrentKeyboardLayout` only invokes the callback on the next
+change.
 
-```coffee
-{observeCurrentKeyboardLayout} = require 'keyboard-layout'
-subscription = observeCurrentKeyboardLayout (layout) -> console.log layout
-subscription.dispose() # to unsubscribe later
+```js
+const KeyboardLayout = require('keyboard-layout')
+subscription = KeyboardLayout.observeCurrentKeyboardLayout((layout) => console.log(layout))
+subscription.dispose() // to unsubscribe later
+```
+
+To return characters for various modifier states based on a DOM 3
+`KeyboardEvent.code` value and the current system keyboard layout, use
+`getCurrentKeymap()`:
+
+```js
+const KeyboardLayout = require('keyboard-layout')
+KeyboardLayout.getCurrentKeymap()['KeyS']
+/*
+On a US layout, this returns:
+{
+  unmodified: 's',
+  withShift: 'S',
+  withAltGr: 'ß',
+  withShiftAltGr: 'Í'
+}
+*/
 ```

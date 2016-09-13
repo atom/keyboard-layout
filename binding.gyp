@@ -1,12 +1,15 @@
 {
   "targets": [
     {
-      "target_name": "keyboard-layout-observer",
+      "target_name": "keyboard-layout-manager",
       "include_dirs": [ "<!(node -e \"require('nan')\")" ],
       "conditions": [
         ['OS=="mac"', {
           "sources": [
-            "src/keyboard-layout-observer-mac.mm",
+            "src/keyboard-layout-manager-mac.mm",
+          ],
+          "include_dirs": [
+            "chrome_headers",
           ],
           "link_settings": {
             "libraries": [
@@ -16,7 +19,7 @@
         }],  # OS=="mac"
         ['OS=="win"', {
           "sources": [
-            "src/keyboard-layout-observer-windows.cc",
+            "src/keyboard-layout-manager-windows.cc",
           ],
           'msvs_settings': {
             'VCCLCompilerTool': {
@@ -38,7 +41,7 @@
         }],  # OS=="win"
         ['OS=="linux"', {
           "sources": [
-            "src/keyboard-layout-observer-non-mac.cc",
+            "src/keyboard-layout-manager-linux.cc",
           ],
         }],  # OS=="linux"
       ]

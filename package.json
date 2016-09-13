@@ -4,8 +4,7 @@
   "description": "Read and observe the current keyboard layout on OS X.",
   "main": "./lib/keyboard-layout",
   "scripts": {
-    "prepublish": "grunt prepublish",
-    "test": "grunt test"
+    "test": "jasmine-focused --captureExceptions --forceexit spec"
   },
   "repository": {
     "type": "git",
@@ -25,15 +24,6 @@
     "nan": "^2.0.0"
   },
   "devDependencies": {
-    "coffee-script": "^1.7.0",
-    "jasmine-focused": "^1.0.4",
-    "grunt-contrib-coffee": "^0.9.0",
-    "grunt-cli": "^0.1.8",
-    "grunt": "^0.4.1",
-    "grunt-shell": "^0.2.2",
-    "grunt-coffeelint": "^0.0.6",
-    "rimraf": "^2.2.2",
-    "coffee-cache": "^0.2.0",
-    "temp": "^0.6.0"
+    "jasmine-focused": "^1.0.4"
   }
 }
