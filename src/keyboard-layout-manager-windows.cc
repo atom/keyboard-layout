@@ -4,7 +4,7 @@
 #undef WINVER
 #define WINVER 0x0601
 
-#include "keyboard-layout-observer.h"
+#include "keyboard-layout-manager.h"
 
 #include <string>
 #include <windows.h>
@@ -28,43 +28,43 @@ std::string ToUTF8(const std::wstring& string) {
   return ret;
 }
 
-void KeyboardLayoutObserver::Init(Handle<Object> target) {
+void KeyboardLayoutManager::Init(Handle<Object> exports, Handle<Object> module) {
   Nan::HandleScope scope;
-  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutObserver::New);
-  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked());
+  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
+  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
-  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
-  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
-  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
-  target->Set(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked(), newTemplate->GetFunction());
+  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
+  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
+  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
+  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
 }
 
-NODE_MODULE(keyboard_layout_observer, KeyboardLayoutObserver::Init)
+NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
 
-NAN_METHOD(KeyboardLayoutObserver::New) {
+NAN_METHOD(KeyboardLayoutManager::New) {
   Nan::HandleScope scope;
 
   Local<Function> callbackHandle = info[0].As<Function>();
   Nan::Callback *callback = new Nan::Callback(callbackHandle);
 
-  KeyboardLayoutObserver *observer = new KeyboardLayoutObserver(callback);
-  observer->Wrap(info.This());
+  KeyboardLayoutManager *manager = new KeyboardLayoutManager(callback);
+  manager->Wrap(info.This());
   return;
 }
 
-KeyboardLayoutObserver::KeyboardLayoutObserver(Nan::Callback *callback) : callback(callback) {
+KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback(callback) {
 }
 
-KeyboardLayoutObserver::~KeyboardLayoutObserver() {
+KeyboardLayoutManager::~KeyboardLayoutManager() {
   delete callback;
 };
 
-void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
+void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   Nan::HandleScope scope;
 
   char layoutName[KL_NAMELENGTH];
@@ -74,7 +74,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
     info.GetReturnValue().Set(Nan::Undefined());
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLanguage) {
   Nan::HandleScope scope;
 
   HKL layout;
@@ -96,7 +96,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   info.GetReturnValue().Set(Nan::New<String>(str.data(), str.size()).ToLocalChecked());
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
+NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
   Nan::HandleScope scope;
 
   int layoutCount = GetKeyboardLayoutList(0, NULL);

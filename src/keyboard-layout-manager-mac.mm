@@ -2,53 +2,53 @@
 #import <dispatch/dispatch.h>
 
 #import <Carbon/Carbon.h>
-#import "keyboard-layout-observer.h"
+#import "keyboard-layout-manager.h"
 #include <vector>
 #include <string>
 
 using namespace v8;
 
-void KeyboardLayoutObserver::Init(Handle<Object> target) {
+void KeyboardLayoutManager::Init(Handle<Object> exports, Handle<Object> module) {
   Nan::HandleScope scope;
-  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutObserver::New);
-  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked());
+  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
+  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
   Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
-  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutObserver::GetCurrentKeyboardLayout);
-  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutObserver::GetCurrentKeyboardLanguage);
-  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutObserver::GetInstalledKeyboardLanguages);
+  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
+  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
+  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
 
-  target->Set(Nan::New<String>("KeyboardLayoutObserver").ToLocalChecked(), newTemplate->GetFunction());
+  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
 }
 
-NODE_MODULE(keyboard_layout_observer, KeyboardLayoutObserver::Init)
+NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
 
-NAN_METHOD(KeyboardLayoutObserver::New) {
+NAN_METHOD(KeyboardLayoutManager::New) {
   Nan::HandleScope scope;
 
   Local<Function> callbackHandle = info[0].As<Function>();
   Nan::Callback *callback = new Nan::Callback(callbackHandle);
 
-  KeyboardLayoutObserver *observer = new KeyboardLayoutObserver(callback);
-  observer->Wrap(info.This());
+  KeyboardLayoutManager *manager = new KeyboardLayoutManager(callback);
+  manager->Wrap(info.This());
   return;
 }
 
 uv_loop_t *loop = uv_default_loop();
 uv_async_t async;
 
-static void notificationHandler(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
-  async.data = observer;
+static void notificationHandler(CFNotificationCenterRef center, void *manager, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+  async.data = manager;
   uv_async_send(&async);
 }
 
 static void asyncSendHandler(uv_async_t *handle) {
-  (static_cast<KeyboardLayoutObserver *>(handle->data))->HandleKeyboardLayoutChanged();
+  (static_cast<KeyboardLayoutManager *>(handle->data))->HandleKeyboardLayoutChanged();
 }
 
-KeyboardLayoutObserver::KeyboardLayoutObserver(Nan::Callback *callback) : callback(callback) {
+KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback(callback) {
   uv_async_init(loop, &async, (uv_async_cb) asyncSendHandler);
 
   CFNotificationCenterAddObserver(
@@ -61,15 +61,15 @@ KeyboardLayoutObserver::KeyboardLayoutObserver(Nan::Callback *callback) : callba
   );
 }
 
-KeyboardLayoutObserver::~KeyboardLayoutObserver() {
+KeyboardLayoutManager::~KeyboardLayoutManager() {
   delete callback;
 };
 
-void KeyboardLayoutObserver::HandleKeyboardLayoutChanged() {
+void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
   callback->Call(0, NULL);
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
+NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
   Nan::HandleScope scope;
 
   @autoreleasepool {
@@ -109,7 +109,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetInstalledKeyboardLanguages) {
   }
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLanguage) {
   Nan::HandleScope scope;
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
 
@@ -119,7 +119,7 @@ NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLanguage) {
   info.GetReturnValue().Set(Nan::New([lang UTF8String]).ToLocalChecked());
 }
 
-NAN_METHOD(KeyboardLayoutObserver::GetCurrentKeyboardLayout) {
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   Nan::HandleScope scope;
   TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
   CFStringRef sourceId = (CFStringRef) TISGetInputSourceProperty(source, kTISPropertyInputSourceID);
