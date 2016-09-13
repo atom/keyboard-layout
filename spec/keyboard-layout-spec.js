@@ -3,31 +3,33 @@
 const KeyboardLayout = require('../lib/keyboard-layout')
 
 describe('Keyboard Layout', () => {
-  describe('.getCurrentKeymap()', function () {
-    it('returns characters corresponding to the given DOM 3 keyboard event code based on the current keyboard layout', function () {
-      const currentLayout = KeyboardLayout.getCurrentKeyboardLayout()
-      switch (currentLayout) {
-        case 'com.apple.keylayout.Dvorak':
-          expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
-            unmodified: 'o',
-            withShift: 'O',
-            withOption: 'ø',
-            withOptionShift: 'Ø'
-          })
-          break;
-        case 'com.apple.keylayout.US':
-          expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
-            unmodified: 's',
-            withShift: 'S',
-            withOption: 'ß',
-            withOptionShift: 'Í'
-          })
-          break;
-        default:
-          throw new Error('No assertion defined for current keyboard layout: ' + currentLayout)
-      }
+  if (process.platform == 'darwin') {
+    describe('.getCurrentKeymap()', function () {
+      it('returns characters corresponding to the given DOM 3 keyboard event code based on the current keyboard layout', function () {
+        const currentLayout = KeyboardLayout.getCurrentKeyboardLayout()
+        switch (currentLayout) {
+          case 'com.apple.keylayout.Dvorak':
+            expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
+              unmodified: 'o',
+              withShift: 'O',
+              withOption: 'ø',
+              withOptionShift: 'Ø'
+            })
+            break;
+          case 'com.apple.keylayout.US':
+            expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
+              unmodified: 's',
+              withShift: 'S',
+              withOption: 'ß',
+              withOptionShift: 'Í'
+            })
+            break;
+          default:
+            throw new Error('No assertion defined for current keyboard layout: ' + currentLayout)
+        }
+      })
     })
-  })
+  }
 
   describe('.getCurrentKeyboardLayout()', () => {
     it('returns the current keyboard layout', () => {
