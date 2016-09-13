@@ -38,7 +38,7 @@
         }],  # OS=="win"
         ['OS=="linux"', {
           "sources": [
-            "src/keyboard-layout-manager-non-mac.cc",
+            "src/keyboard-layout-manager-linux.cc",
           ],
         }],  # OS=="linux"
       ]
