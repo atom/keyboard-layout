@@ -171,10 +171,9 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
     return;
   }
 
-  Handle<Object> result = Nan::New<Object>();
-
   const UCKeyboardLayout* keyboardLayout = reinterpret_cast<const UCKeyboardLayout*>(CFDataGetBytePtr(layoutData));
 
+  Handle<Object> result = Nan::New<Object>();
   Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
   Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
   Local<String> withOptionKey = Nan::New("withOption").ToLocalChecked();

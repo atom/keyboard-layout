@@ -38,6 +38,8 @@ void KeyboardLayoutManager::Init(Handle<Object> exports, Handle<Object> module) 
   Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
   Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
+  Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
+
   module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
 }
 
@@ -119,6 +121,68 @@ NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
   info.GetReturnValue().Set(result);
 }
 
+struct KeycodeMapEntry {
+  UINT scanCode;
+  const char *dom3Code;
+};
+
+#define USB_KEYMAP_DECLARATION static const KeycodeMapEntry keyCodeMap[] =
+#define USB_KEYMAP(usb, evdev, xkb, win, mac, code, id) {win, code}
+
+#include "keycode_converter_data.inc"
+
+Local<String> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanCode,
+                                     BYTE *keyboardState, bool shift, bool altGraph) {
+  memset(keyboardState, 0, 256);
+  if (shift) {
+    keyboardState[VK_SHIFT] |= 0x80;
+  }
+
+  if (altGraph) {
+    keyboardState[VK_MENU] |= 0x80;
+    keyboardState[VK_CONTROL] |= 0x80;
+  }
+
+  wchar_t characters[5];
+  int count = ToUnicodeEx(keyCode, scanCode, keyboardState, characters, 5, 0, keyboardLayout);
+  return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
+}
+
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
-  Nan::ThrowError("getCurrentKeymap is not implemented on Windows");
+  BYTE keyboardState[256];
+  HKL keyboardLayout = GetKeyboardLayout(0);
+
+  Handle<Object> result = Nan::New<Object>();
+  Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
+  Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
+  Local<String> withAltGrKey = Nan::New("withAltGr").ToLocalChecked();
+  Local<String> withAltGrShiftKey = Nan::New("withAltGrShift").ToLocalChecked();
+
+  size_t keyCodeMapSize = sizeof(keyCodeMap) / sizeof(keyCodeMap[0]);
+  for (size_t i = 0; i < keyCodeMapSize; i++) {
+    const char *dom3Code = keyCodeMap[i].dom3Code;
+    UINT scanCode = keyCodeMap[i].scanCode;
+
+    if (dom3Code && scanCode < 0xffff) {
+      memset(keyboardState, 0, 256);
+      UINT keyCode = MapVirtualKeyEx(scanCode, MAPVK_VSC_TO_VK, keyboardLayout);
+
+      Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
+      Local<String> unmodified = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, false);
+      Local<String> withShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, false);
+      Local<String> withAltGr = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, true);
+      Local<String> withAltGrShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, true);
+
+      Local<Object> entry = Nan::New<Object>();
+      entry->Set(unmodifiedKey, unmodified);
+      entry->Set(withShiftKey, withShift);
+      entry->Set(withAltGrKey, withAltGr);
+      entry->Set(withAltGrShiftKey, withAltGrShift);
+
+      result->Set(dom3CodeKey, entry);
+    }
+  }
+
+  info.GetReturnValue().Set(result);
+
 }
