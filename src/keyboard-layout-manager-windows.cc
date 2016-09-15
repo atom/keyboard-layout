@@ -135,12 +135,12 @@ Local<String> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scan
                                      BYTE *keyboardState, bool shift, bool altGraph) {
   memset(keyboardState, 0, 256);
   if (shift) {
-    keyboardState[VK_SHIFT] |= 0x80;
+    keyboardState[VK_SHIFT] = 0x80;
   }
 
   if (altGraph) {
-    keyboardState[VK_MENU] |= 0x80;
-    keyboardState[VK_CONTROL] |= 0x80;
+    keyboardState[VK_MENU] = 0x80;
+    keyboardState[VK_CONTROL] = 0x80;
   }
 
   wchar_t characters[5];
