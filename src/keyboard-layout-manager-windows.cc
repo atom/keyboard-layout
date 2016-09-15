@@ -7,6 +7,7 @@
 #include "keyboard-layout-manager.h"
 
 #include <string>
+#include <cctype>
 #include <windows.h>
 
 using namespace v8;
@@ -131,7 +132,7 @@ struct KeycodeMapEntry {
 
 #include "keycode_converter_data.inc"
 
-Local<String> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanCode,
+Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanCode,
                                      BYTE *keyboardState, bool shift, bool altGraph) {
   memset(keyboardState, 0, 256);
   if (shift) {
@@ -145,7 +146,12 @@ Local<String> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scan
 
   wchar_t characters[5];
   int count = ToUnicodeEx(keyCode, scanCode, keyboardState, characters, 5, 0, keyboardLayout);
-  return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
+
+  if (count > 0 && !std::iscntrl(characters[0])) {
+    return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
+  } else {
+    return Nan::Null();
+  }
 }
 
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
@@ -167,18 +173,20 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
       UINT keyCode = MapVirtualKeyEx(scanCode, MAPVK_VSC_TO_VK, keyboardLayout);
 
       Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
-      Local<String> unmodified = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, false);
-      Local<String> withShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, false);
-      Local<String> withAltGraph = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, true);
-      Local<String> withAltGraphShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, true);
+      Local<Value> unmodified = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, false);
+      Local<Value> withShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, false);
+      Local<Value> withAltGraph = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, true);
+      Local<Value> withAltGraphShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, true);
 
-      Local<Object> entry = Nan::New<Object>();
-      entry->Set(unmodifiedKey, unmodified);
-      entry->Set(withShiftKey, withShift);
-      entry->Set(withAltGraphKey, withAltGraph);
-      entry->Set(withAltGraphShiftKey, withAltGraphShift);
+      if (unmodified->IsString() || withShift->IsString() || withAltGraph->IsString() || withAltGraphShift->IsString()) {
+        Local<Object> entry = Nan::New<Object>();
+        entry->Set(unmodifiedKey, unmodified);
+        entry->Set(withShiftKey, withShift);
+        entry->Set(withAltGraphKey, withAltGraph);
+        entry->Set(withAltGraphShiftKey, withAltGraphShift);
 
-      result->Set(dom3CodeKey, entry);
+        result->Set(dom3CodeKey, entry);
+      }
     }
   }
 
