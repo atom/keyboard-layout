@@ -2,14 +2,14 @@
   "targets": [
     {
       "target_name": "keyboard-layout-manager",
-      "include_dirs": [ "<!(node -e \"require('nan')\")" ],
+      "include_dirs": [
+        "<!(node -e \"require('nan')\")",
+        "chrome_headers",
+      ],
       "conditions": [
         ['OS=="mac"', {
           "sources": [
             "src/keyboard-layout-manager-mac.mm",
-          ],
-          "include_dirs": [
-            "chrome_headers",
           ],
           "link_settings": {
             "libraries": [

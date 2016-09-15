@@ -5,6 +5,7 @@
 #import "keyboard-layout-manager.h"
 #include <vector>
 #include <string>
+#include <cctype>
 
 using namespace v8;
 
@@ -137,7 +138,7 @@ struct KeycodeMapEntry {
 
 #include "keycode_converter_data.inc"
 
-Local<String> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt16 virtualKeyCode, EventModifiers modifiers) {
+Local<Value> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt16 virtualKeyCode, EventModifiers modifiers) {
   // See https://developer.apple.com/reference/coreservices/1390584-uckeytranslate?language=objc
   UInt32 modifierKeyState = (modifiers >> 8) & 0xFF;
   UInt32 deadKeyState = 0;
@@ -155,10 +156,10 @@ Local<String> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UIn
       &charCount,
       characters);
 
-  if (status == noErr) {
+  if (status == noErr && !std::iscntrl(characters[0])) {
     return Nan::New(static_cast<const uint16_t *>(characters), static_cast<int>(charCount)).ToLocalChecked();
   } else {
-    return Nan::New("").ToLocalChecked();
+    return Nan::Null();
   }
 }
 
@@ -171,14 +172,13 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
     return;
   }
 
-  Handle<Object> result = Nan::New<Object>();
-
   const UCKeyboardLayout* keyboardLayout = reinterpret_cast<const UCKeyboardLayout*>(CFDataGetBytePtr(layoutData));
 
+  Handle<Object> result = Nan::New<Object>();
   Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
   Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
-  Local<String> withOptionKey = Nan::New("withOption").ToLocalChecked();
-  Local<String> withOptionShiftKey = Nan::New("withOptionShift").ToLocalChecked();
+  Local<String> withAltGraphKey = Nan::New("withAltGraph").ToLocalChecked();
+  Local<String> withAltGraphShiftKey = Nan::New("withAltGraphShift").ToLocalChecked();
 
   size_t keyCodeMapSize = sizeof(keyCodeMap) / sizeof(keyCodeMap[0]);
   for (size_t i = 0; i < keyCodeMapSize; i++) {
@@ -187,18 +187,20 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
     if (dom3Code && virtualKeyCode < 0xffff) {
       Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
 
-      Local<String> unmodified = CharacterForNativeCode(keyboardLayout, virtualKeyCode, 0);
-      Local<String> withShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit));
-      Local<String> withOption = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << optionKeyBit));
-      Local<String> withOptionShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit) | (1 << optionKeyBit));
+      Local<Value> unmodified = CharacterForNativeCode(keyboardLayout, virtualKeyCode, 0);
+      Local<Value> withShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit));
+      Local<Value> withAltGraph = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << optionKeyBit));
+      Local<Value> withAltGraphShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit) | (1 << optionKeyBit));
 
-      Local<Object> entry = Nan::New<Object>();
-      entry->Set(unmodifiedKey, unmodified);
-      entry->Set(withShiftKey, withShift);
-      entry->Set(withOptionKey, withOption);
-      entry->Set(withOptionShiftKey, withOptionShift);
+      if (unmodified->IsString() || withShift->IsString() || withAltGraph->IsString() || withAltGraphShift->IsString()) {
+        Local<Object> entry = Nan::New<Object>();
+        entry->Set(unmodifiedKey, unmodified);
+        entry->Set(withShiftKey, withShift);
+        entry->Set(withAltGraphKey, withAltGraph);
+        entry->Set(withAltGraphShiftKey, withAltGraphShift);
 
-      result->Set(dom3CodeKey, entry);
+        result->Set(dom3CodeKey, entry);
+      }
     }
   }
 

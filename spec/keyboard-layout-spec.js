@@ -3,7 +3,7 @@
 const KeyboardLayout = require('../lib/keyboard-layout')
 
 describe('Keyboard Layout', () => {
-  if (process.platform == 'darwin') {
+  if (process.platform === 'darwin' || process.platform === 'win32') {
     describe('.getCurrentKeymap()', function () {
       it('returns characters corresponding to the given DOM 3 keyboard event code based on the current keyboard layout', function () {
         const currentLayout = KeyboardLayout.getCurrentKeyboardLayout()
@@ -12,18 +12,38 @@ describe('Keyboard Layout', () => {
             expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
               unmodified: 'o',
               withShift: 'O',
-              withOption: 'ø',
-              withOptionShift: 'Ø'
+              withAltGraph: 'ø',
+              withAltGraphShift: 'Ø'
             })
-            break;
+            break
+
+          case '00010409':
+            expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
+              unmodified: 'o',
+              withShift: 'O',
+              withAltGraph: null,
+              withAltGraphShift: null
+            })
+            break
+
           case 'com.apple.keylayout.US':
             expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
               unmodified: 's',
               withShift: 'S',
-              withOption: 'ß',
-              withOptionShift: 'Í'
+              withAltGraph: 'ß',
+              withAltGraphShift: 'Í'
             })
             break;
+
+          case '00000409':
+            expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
+              unmodified: 's',
+              withShift: 'S',
+              withAltGraph: null,
+              withAltGraphShift: null
+            })
+            break
+
           default:
             throw new Error('No assertion defined for current keyboard layout: ' + currentLayout)
         }
