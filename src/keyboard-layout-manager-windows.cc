@@ -163,7 +163,7 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
     const char *dom3Code = keyCodeMap[i].dom3Code;
     UINT scanCode = keyCodeMap[i].scanCode;
 
-    if (dom3Code && scanCode < 0xffff) {
+    if (dom3Code && scanCode > 0x0000) {
       UINT keyCode = MapVirtualKeyEx(scanCode, MAPVK_VSC_TO_VK, keyboardLayout);
 
       Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
