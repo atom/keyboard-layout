@@ -21,8 +21,8 @@ describe('Keyboard Layout', () => {
             expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
               unmodified: 'o',
               withShift: 'O',
-              withAltGraph: '',
-              withAltGraphShift: ''
+              withAltGraph: null,
+              withAltGraphShift: null
             })
             break
 
@@ -39,8 +39,8 @@ describe('Keyboard Layout', () => {
             expect(KeyboardLayout.getCurrentKeymap()['KeyS']).toEqual({
               unmodified: 's',
               withShift: 'S',
-              withAltGraph: '',
-              withAltGraphShift: ''
+              withAltGraph: null,
+              withAltGraphShift: null
             })
             break
 
