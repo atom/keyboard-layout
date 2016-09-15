@@ -36,8 +36,8 @@ On a US layout, this returns:
 {
   unmodified: 's',
   withShift: 'S',
-  withAltGr: 'ß',
-  withShiftAltGr: 'Í'
+  withAltGraph: 'ß',
+  withShiftAltGraph: 'Í'
 }
 */
 ```

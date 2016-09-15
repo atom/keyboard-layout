@@ -155,8 +155,8 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
   Handle<Object> result = Nan::New<Object>();
   Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
   Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
-  Local<String> withAltGrKey = Nan::New("withAltGr").ToLocalChecked();
-  Local<String> withAltGrShiftKey = Nan::New("withAltGrShift").ToLocalChecked();
+  Local<String> withAltGraphKey = Nan::New("withAltGraph").ToLocalChecked();
+  Local<String> withAltGraphShiftKey = Nan::New("withAltGraphShift").ToLocalChecked();
 
   size_t keyCodeMapSize = sizeof(keyCodeMap) / sizeof(keyCodeMap[0]);
   for (size_t i = 0; i < keyCodeMapSize; i++) {
@@ -169,14 +169,14 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
       Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
       Local<String> unmodified = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, false);
       Local<String> withShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, false);
-      Local<String> withAltGr = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, true);
-      Local<String> withAltGrShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, true);
+      Local<String> withAltGraph = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, true);
+      Local<String> withAltGraphShift = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, true, true);
 
       Local<Object> entry = Nan::New<Object>();
       entry->Set(unmodifiedKey, unmodified);
       entry->Set(withShiftKey, withShift);
-      entry->Set(withAltGrKey, withAltGr);
-      entry->Set(withAltGrShiftKey, withAltGrShift);
+      entry->Set(withAltGraphKey, withAltGraph);
+      entry->Set(withAltGraphShiftKey, withAltGraphShift);
 
       result->Set(dom3CodeKey, entry);
     }
