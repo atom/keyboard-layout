@@ -4,6 +4,8 @@
 #undef WINVER
 #define WINVER 0x0601
 
+#define SPACE_SCAN_CODE 0x0039
+
 #include "keyboard-layout-manager.h"
 
 #include <string>
@@ -146,6 +148,14 @@ Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanC
 
   wchar_t characters[5];
   int count = ToUnicodeEx(keyCode, scanCode, keyboardState, characters, 5, 0, keyboardLayout);
+
+  if (count == -1) { // Dead key
+    Local<String> result = Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
+    // Clear dead key out of kernel-mode keyboard buffer so subsequent translations are not affected
+    UINT spaceKeyCode = MapVirtualKeyEx(SPACE_SCAN_CODE, MAPVK_VSC_TO_VK, keyboardLayout);
+    ToUnicodeEx(spaceKeyCode, SPACE_SCAN_CODE, keyboardState, characters, 5, 0, keyboardLayout);
+    return result;
+  }
 
   if (count > 0 && !std::iscntrl(characters[0])) {
     return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
