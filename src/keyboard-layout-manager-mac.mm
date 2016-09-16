@@ -156,6 +156,22 @@ Local<Value> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt
       &charCount,
       characters);
 
+  // If the previous key was dead, translate again with the same dead key
+  // state to get a printable character.
+  if (status == noErr && deadKeyState != 0) {
+    status = UCKeyTranslate(
+        keyboardLayout,
+        static_cast<UInt16>(virtualKeyCode),
+        kUCKeyActionDown,
+        modifierKeyState,
+        LMGetKbdLast(),
+        kUCKeyTranslateNoDeadKeysBit,
+        &deadKeyState,
+        sizeof(characters) / sizeof(characters[0]),
+        &charCount,
+        characters);
+  }
+
   if (status == noErr && !std::iscntrl(characters[0])) {
     return Nan::New(static_cast<const uint16_t *>(characters), static_cast<int>(charCount)).ToLocalChecked();
   } else {
