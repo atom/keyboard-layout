@@ -3,11 +3,13 @@
 
 #include "nan.h"
 
-using namespace v8;  // NOLINT
+#ifdef __linux__
+#include <X11/Xlib.h>
+#endif // __linux__
 
 class KeyboardLayoutManager : public Nan::ObjectWrap {
  public:
-  static void Init(Handle<Object> target, Handle<Object> module);
+  static void Init(v8::Handle<v8::Object> target, v8::Handle<v8::Object> module);
   void HandleKeyboardLayoutChanged();
 
  private:
@@ -18,6 +20,10 @@ class KeyboardLayoutManager : public Nan::ObjectWrap {
   static NAN_METHOD(GetCurrentKeyboardLanguage);
   static NAN_METHOD(GetInstalledKeyboardLanguages);
   static NAN_METHOD(GetCurrentKeymap);
+
+#ifdef __linux__
+  Display *xDisplay;
+#endif
 
   Nan::Callback *callback;
 };
