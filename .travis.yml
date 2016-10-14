@@ -1,14 +1,17 @@
 language: node_js
 
-node_js: 6
-
-os:
-  - linux
-  - osx
+matrix:
+  include:
+    - os: linux
+      node_js: 6
+      env: CC=clang CXX=clang++ npm_config_clang=1
+    - os: osx
+      node_js: 6
 
 addons:
   apt:
     packages:
+      - clang-3.3
       - libx11-dev
       - libxkbfile-dev
 
