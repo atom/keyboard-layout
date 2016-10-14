@@ -4,7 +4,7 @@ matrix:
   include:
     - os: linux
       node_js: 6
-      env: CC=clang CXX=clang++ npm_config_clang=1
+      env: DISPLAY=:99.0 CC=clang CXX=clang++ npm_config_clang=1
     - os: osx
       node_js: 6
 
@@ -15,12 +15,15 @@ addons:
       - libx11-dev
       - libxkbfile-dev
 
-notifications:
-  email:
-    on_success: never
-    on_failure: change
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 
 script: 'npm test'
 
 git:
   depth: 1
+
+notifications:
+  email:
+    on_success: never
+    on_failure: change
