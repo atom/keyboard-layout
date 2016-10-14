@@ -4,6 +4,12 @@ os:
   - linux
   - osx
 
+addons:
+  apt:
+    packages:
+      - libx11-dev
+      - libxkbfile-dev
+
 notifications:
   email:
     on_success: never
