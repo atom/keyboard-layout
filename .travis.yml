@@ -1,15 +1,15 @@
-language: objective-c
+language: node_js
+
+os:
+  - linux
+  - osx
 
 notifications:
   email:
     on_success: never
     on_failure: change
 
-script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
+script: 'npm test'
 
 git:
-  depth: 10
-
-branches:
-  only:
-    - master
+  depth: 1
