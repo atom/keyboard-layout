@@ -5,6 +5,8 @@ matrix:
     - os: linux
       node_js: 6
       env: DISPLAY=:99.0 CC=clang CXX=clang++ npm_config_clang=1
+      before_install:
+        - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
     - os: osx
       node_js: 6
 
@@ -14,9 +16,6 @@ addons:
       - clang-3.3
       - libx11-dev
       - libxkbfile-dev
-
-before_install:
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
 
 script: 'npm test'
 
