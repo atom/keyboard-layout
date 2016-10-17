@@ -43,11 +43,6 @@
           "sources": [
             "src/keyboard-layout-manager-linux.cc",
           ],
-          "link_settings": {
-            "libraries": [
-              "-lX11", "-lxkbfile"
-            ]
-          }
         }],  # OS=="linux"
       ]
     }
