@@ -184,7 +184,7 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
   CFDataRef layoutData = static_cast<CFDataRef>(TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData));
 
   if (layoutData == NULL) {
-    Nan::ThrowError("Could not read current keyboard layout");
+    info.GetReturnValue().Set(Nan::Null());
     return;
   }
 
