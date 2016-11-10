@@ -180,7 +180,7 @@ Local<Value> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt
 }
 
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
-  TISInputSourceRef source = TISCopyCurrentKeyboardInputSource();
+  TISInputSourceRef source = TISCopyCurrentKeyboardLayoutInputSource();
   CFDataRef layoutData = static_cast<CFDataRef>(TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData));
 
   if (layoutData == NULL) {
