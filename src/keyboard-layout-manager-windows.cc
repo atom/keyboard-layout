@@ -149,14 +149,6 @@ Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanC
   wchar_t characters[5];
   int count = ToUnicodeEx(keyCode, scanCode, keyboardState, characters, 5, 0, keyboardLayout);
 
-  if (count == -1) { // Dead key
-    Local<String> result = Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
-    // Clear dead key out of kernel-mode keyboard buffer so subsequent translations are not affected
-    UINT spaceKeyCode = MapVirtualKeyEx(SPACE_SCAN_CODE, MAPVK_VSC_TO_VK, keyboardLayout);
-    ToUnicodeEx(spaceKeyCode, SPACE_SCAN_CODE, keyboardState, characters, 5, 0, keyboardLayout);
-    return result;
-  }
-
   if (count > 0 && !std::iscntrl(characters[0])) {
     return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
   } else {
@@ -181,6 +173,13 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
     if (dom3Code && scanCode > 0x0000) {
       UINT keyCode = MapVirtualKeyEx(scanCode, MAPVK_VSC_TO_VK, keyboardLayout);
+
+      // Detect and skip dead keys. If the most significant bit of the returned
+      // character value is 1, this is a dead key. Trying to translate it to a
+      // character will mutate the Windows keyboard buffer and blow away pending
+      // dead keys. To avoid this bug, we just refuse to map dead keys to
+      // characters.
+      if ((MapVirtualKeyEx(keyCode, MAPVK_VK_TO_CHAR, keyboardLayout) >> (sizeof(UINT) * 8 - 1))) continue;
 
       Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
       Local<Value> unmodified = CharacterForNativeCode(keyboardLayout, keyCode, scanCode, keyboardState, false, false);
