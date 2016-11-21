@@ -31,6 +31,15 @@ std::string ToUTF8(const std::wstring& string) {
   return ret;
 }
 
+HKL GetForegroundWindowHKL() {
+  DWORD dwThreadId = 0;
+  HWND hWnd = GetForegroundWindow();
+  if (hWnd != NULL) {
+    dwThreadId = GetWindowThreadProcessId(hWnd, NULL);
+  }
+  return GetKeyboardLayout(dwThreadId);
+}
+
 void KeyboardLayoutManager::Init(Handle<Object> exports, Handle<Object> module) {
   Nan::HandleScope scope;
   Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
@@ -72,6 +81,7 @@ void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   Nan::HandleScope scope;
 
+  ActivateKeyboardLayout(GetForegroundWindowHKL(), 0);
   char layoutName[KL_NAMELENGTH];
   if (::GetKeyboardLayoutName(layoutName))
     info.GetReturnValue().Set(Nan::New(layoutName).ToLocalChecked());
@@ -82,15 +92,7 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLanguage) {
   Nan::HandleScope scope;
 
-  HKL layout;
-  DWORD dwThreadId = 0;
-  HWND hWnd = GetForegroundWindow();
-
-  if (hWnd != NULL) {
-    dwThreadId = GetWindowThreadProcessId(hWnd, NULL);
-  }
-
-  layout = GetKeyboardLayout(dwThreadId);
+  HKL layout = GetForegroundWindowHKL();
 
   wchar_t buf[LOCALE_NAME_MAX_LENGTH];
   std::wstring wstr;
@@ -158,7 +160,7 @@ Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanC
 
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
   BYTE keyboardState[256];
-  HKL keyboardLayout = GetKeyboardLayout(0);
+  HKL keyboardLayout = GetForegroundWindowHKL();
 
   Handle<Object> result = Nan::New<Object>();
   Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
