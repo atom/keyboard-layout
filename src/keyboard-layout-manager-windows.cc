@@ -9,7 +9,7 @@
 #include "keyboard-layout-manager.h"
 
 #include <string>
-#include <cctype>
+#include <cwctype>
 #include <windows.h>
 
 using namespace v8;
@@ -151,7 +151,7 @@ Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanC
   wchar_t characters[5];
   int count = ToUnicodeEx(keyCode, scanCode, keyboardState, characters, 5, 0, keyboardLayout);
 
-  if (count > 0 && !std::iscntrl(characters[0])) {
+  if (count > 0 && !std::iswcntrl(characters[0])) {
     return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
   } else {
     return Nan::Null();
