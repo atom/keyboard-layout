@@ -11,6 +11,7 @@
 #include <string>
 #include <cwctype>
 #include <windows.h>
+#include <iostream>
 
 using namespace v8;
 
@@ -68,12 +69,51 @@ NAN_METHOD(KeyboardLayoutManager::New) {
   return;
 }
 
+HHOOK previousWindowInputChangeHook = nullptr;
+
 KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback(callback) {
-}
+  std::cout << "instantiating\n";
+  auto result = SetWinEventHook(
+    EVENT_SYSTEM_FOREGROUND,
+    EVENT_SYSTEM_FOREGROUND,
+    NULL,
+    [](HWINEVENTHOOK hWinEventHook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime) {
+      if (previousWindowInputChangeHook) {
+        UnhookWindowsHookEx(previousWindowInputChangeHook);
+      }
+
+      previousWindowInputChangeHook = SetWindowsHookEx(
+        WH_CALLWNDPROC,
+        [](int nCode, WPARAM wParam, LPARAM lParam) {
+          std::cout << nCode << "\n";
+          if (nCode == WM_INPUTLANGCHANGE) {
+            std::cout << "Yay!\n";
+          }
+          return CallNextHookEx(NULL, nCode, wParam, lParam);
+        },
+        nullptr,
+        GetWindowThreadProcessId(hwnd, nullptr)
+      );
+      std::cout << previousWindowInputChangeHook << "\n";
+    },
+    0,
+    0,
+    WINEVENT_OUTOFCONTEXT
+  );
+  std::cout << result << "\n";
+  MSG msg;
+  while(GetMessage(&msg, NULL, 0, 0) > 0)
+  {
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+  }
+};
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
   delete callback;
 };
+
+
 
 void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
 }
