@@ -1,4 +1,5 @@
-# keyboard-layout [![Build Status](https://travis-ci.org/atom/keyboard-layout.svg?branch=master)](https://travis-ci.org/atom/keyboard-layout) [![Build status](https://ci.appveyor.com/api/projects/status/303xcfrs0yj448au/branch/master?svg=true)](https://ci.appveyor.com/project/kevinsawicki/keyboard-layout/branch/master)
+# keyboard-layout
+[![Build Status](https://travis-ci.org/atom/keyboard-layout.svg?branch=master)](https://travis-ci.org/atom/keyboard-layout) [![Build status](https://ci.appveyor.com/api/projects/status/rk8wooeyh689apgd/branch/master?svg=true)] (https://ci.appveyor.com/project/Atom/keyboard-layout) [![Dependency Status](https://david-dm.org/atom/keyboard-layout/status.svg)](https://david-dm.org/atom/keyboard-layout)
 
 Read and observe the current keyboard layout on OS X.
 
