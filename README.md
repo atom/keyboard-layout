@@ -1,7 +1,7 @@
 # keyboard-layout
 [![macOS Build Status](https://travis-ci.org/atom/keyboard-layout.svg?branch=master)](https://travis-ci.org/atom/keyboard-layout) [![Windows Build status](https://ci.appveyor.com/api/projects/status/rk8wooeyh689apgd/branch/master?svg=true)] (https://ci.appveyor.com/project/Atom/keyboard-layout) [![Dependency Status](https://david-dm.org/atom/keyboard-layout/status.svg)](https://david-dm.org/atom/keyboard-layout)
 
-Read and observe the current keyboard layout on OS X.
+Read and observe the current keyboard layout.
 
 To get the current keyboard layout, call `getCurrentKeyboardLayout`. It returns
 the string identifier of the current layout based on the value returned by the
