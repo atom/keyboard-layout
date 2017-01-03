@@ -100,8 +100,12 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
 
   XkbRF_VarDefsRec vdr;
   char *tmp = NULL;
-  if (XkbRF_GetNamesProp(manager->xDisplay, &tmp, &vdr) && vdr.layout && vdr.variant) {
-    result = Nan::New<v8::String>(std::string(vdr.layout) + "," + std::string(vdr.variant)).ToLocalChecked();
+  if (XkbRF_GetNamesProp(manager->xDisplay, &tmp, &vdr) && vdr.layout) {
+    if (vdr.variant) {
+      result = Nan::New<v8::String>(std::string(vdr.layout) + "," + std::string(vdr.variant)).ToLocalChecked();
+    } else {
+      result = Nan::New<v8::String>(std::string(vdr.layout)).ToLocalChecked();
+    }
   } else {
     result = Nan::Null();
   }
