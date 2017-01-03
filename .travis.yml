@@ -7,6 +7,8 @@ matrix:
       env: DISPLAY=:99.0 CC=clang CXX=clang++ npm_config_clang=1
       before_install:
         - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1280x1024x16"
+      before_script:
+        - "./node_modules/.bin/electron &" # this opens a new window in the background, so that `XGetInputFocus` works in a xvfb headless environment.
     - os: osx
       node_js: 6
 

@@ -24,6 +24,7 @@
     "nan": "^2.0.0"
   },
   "devDependencies": {
+    "electron": "^1.4.13",
     "jasmine-focused": "^1.0.4"
   }
 }
