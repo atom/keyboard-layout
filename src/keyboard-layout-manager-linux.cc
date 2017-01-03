@@ -35,16 +35,19 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   xDisplay = XOpenDisplay("");
   if (!xDisplay) {
     Nan::ThrowError("Could not connect to X display.");
+    return;
   }
 
   XIM xInputMethod = XOpenIM(xDisplay, 0, 0, 0);
   if (!xInputMethod) {
     Nan::ThrowError("Could not create an input method.");
+    return;
   }
 
   XIMStyles* styles = 0;
   if (XGetIMValues(xInputMethod, XNQueryInputStyle, &styles, NULL) || !styles) {
     Nan::ThrowError("Could not retrieve input styles.");
+    return;
   }
 
   XIMStyle bestMatchStyle = 0;
@@ -59,6 +62,7 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   XFree(styles);
   if (!bestMatchStyle) {
     Nan::ThrowError("Could not retrieve input styles.");
+    return;
   }
 
   Window window;
@@ -66,6 +70,7 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   XGetInputFocus(xDisplay, &window, &revert_to);
   if (!window) {
     Nan::ThrowError("Could not find foreground window.");
+    return;
   }
 
   xInputContext = XCreateIC(
@@ -74,6 +79,7 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   );
   if (!xInputContext) {
     Nan::ThrowError("Could not create an input context.");
+    return;
   }
 }
 
