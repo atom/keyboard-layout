@@ -3,6 +3,7 @@
 #include <X11/XKBlib.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/XKBrules.h>
+#include <cwctype>
 
 void KeyboardLayoutManager::Init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
   Nan::HandleScope scope;
@@ -35,9 +36,49 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   if (!xDisplay) {
     Nan::ThrowError("Could not connect to X display.");
   }
+
+  XIM xInputMethod = XOpenIM(xDisplay, 0, 0, 0);
+  if (!xInputMethod) {
+    Nan::ThrowError("Could not create an input method.");
+  }
+
+  XIMStyles* styles = 0;
+  if (XGetIMValues(xInputMethod, XNQueryInputStyle, &styles, NULL) || !styles) {
+    Nan::ThrowError("Could not retrieve input styles.");
+  }
+
+  XIMStyle bestMatchStyle = 0;
+  for (int i = 0; i < styles->count_styles; i++) {
+    XIMStyle thisStyle = styles->supported_styles[i];
+    if (thisStyle == (XIMPreeditNothing | XIMStatusNothing))
+    {
+      bestMatchStyle = thisStyle;
+      break;
+    }
+  }
+  XFree(styles);
+  if (!bestMatchStyle) {
+    Nan::ThrowError("Could not retrieve input styles.");
+  }
+
+  Window window;
+  int revert_to;
+  XGetInputFocus(xDisplay, &window, &revert_to);
+  if (!window) {
+    Nan::ThrowError("Could not find foreground window.");
+  }
+
+  xInputContext = XCreateIC(
+    xInputMethod, XNInputStyle, bestMatchStyle, XNClientWindow, window,
+    XNFocusWindow, window, NULL
+  );
+  if (!xInputContext) {
+    Nan::ThrowError("Could not create an input context.");
+  }
 }
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
+  XDestroyIC(xInputContext);
   XCloseDisplay(xDisplay);
   delete callback;
 };
@@ -78,15 +119,15 @@ struct KeycodeMapEntry {
 
 #include "keycode_converter_data.inc"
 
-v8::Local<v8::Value> CharacterForNativeCode(XKeyEvent *keyEvent, uint xkbKeycode, uint state) {
+v8::Local<v8::Value> CharacterForNativeCode(XIC xInputContext, XKeyEvent *keyEvent, uint xkbKeycode, uint state) {
   keyEvent->keycode = xkbKeycode;
   keyEvent->state = state;
 
-  char characters[2];
-  int count = XLookupString(keyEvent, characters, 2, NULL, NULL);
+  wchar_t characters[2];
+  int count = XwcLookupString(xInputContext, keyEvent, characters, 2, NULL, NULL);
 
-  if (count > 0 && !std::iscntrl(characters[0])) {
-    return Nan::New<v8::String>(characters, count).ToLocalChecked();
+  if (count > 0 && !std::iswcntrl(characters[0])) {
+    return Nan::New<v8::String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
   } else {
     return Nan::Null();
   }
@@ -116,8 +157,8 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
     if (dom3Code && xkbKeycode > 0x0000) {
       v8::Local<v8::String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
-      v8::Local<v8::Value> unmodified = CharacterForNativeCode(keyEvent, xkbKeycode, 0);
-      v8::Local<v8::Value> withShift = CharacterForNativeCode(keyEvent, xkbKeycode, ShiftMask);
+      v8::Local<v8::Value> unmodified = CharacterForNativeCode(manager->xInputContext, keyEvent, xkbKeycode, 0);
+      v8::Local<v8::Value> withShift = CharacterForNativeCode(manager->xInputContext, keyEvent, xkbKeycode, ShiftMask);
 
       if (unmodified->IsString() || withShift->IsString()) {
         v8::Local<v8::Object> entry = Nan::New<v8::Object>();
