@@ -38,7 +38,7 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
     return;
   }
 
-  XIM xInputMethod = XOpenIM(xDisplay, 0, 0, 0);
+  xInputMethod = XOpenIM(xDisplay, 0, 0, 0);
   if (!xInputMethod) {
     Nan::ThrowError("Could not create an input method.");
     return;
@@ -85,6 +85,7 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
   XDestroyIC(xInputContext);
+  XCloseIM(xInputMethod);
   XCloseDisplay(xDisplay);
   delete callback;
 };
