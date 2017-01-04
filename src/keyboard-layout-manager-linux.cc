@@ -53,7 +53,9 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   XkbRF_VarDefsRec vdr;
   char *tmp = NULL;
   if (XkbRF_GetNamesProp(manager->xDisplay, &tmp, &vdr) && vdr.layout && vdr.variant) {
-    result = Nan::New<v8::String>(std::string(vdr.layout) + "," + std::string(vdr.variant)).ToLocalChecked();
+    XkbStateRec xkbState;
+    XkbGetState(manager->xDisplay, XkbUseCoreKbd, &xkbState);
+    result = Nan::New<v8::String>(std::string(vdr.layout) + "," + std::string(vdr.variant) + " [" + std::to_string(xkbState.group) + "]").ToLocalChecked();
   } else {
     result = Nan::Null();
   }
