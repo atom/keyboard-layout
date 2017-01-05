@@ -23,6 +23,8 @@ class KeyboardLayoutManager : public Nan::ObjectWrap {
 
 #ifdef __linux__
   Display *xDisplay;
+  XIC xInputContext;
+  XIM xInputMethod;
 #endif
 
   Nan::Callback *callback;
