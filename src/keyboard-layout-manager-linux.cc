@@ -101,10 +101,12 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   XkbRF_VarDefsRec vdr;
   char *tmp = NULL;
   if (XkbRF_GetNamesProp(manager->xDisplay, &tmp, &vdr) && vdr.layout) {
+    XkbStateRec xkbState;
+    XkbGetState(manager->xDisplay, XkbUseCoreKbd, &xkbState);
     if (vdr.variant) {
-      result = Nan::New<v8::String>(std::string(vdr.layout) + "," + std::string(vdr.variant)).ToLocalChecked();
+      result = Nan::New<v8::String>(std::string(vdr.layout) + "," + std::string(vdr.variant) + " [" + std::to_string(xkbState.group) + "]").ToLocalChecked();
     } else {
-      result = Nan::New<v8::String>(std::string(vdr.layout)).ToLocalChecked();
+      result = Nan::New<v8::String>(std::string(vdr.layout) + " [" + std::to_string(xkbState.group) + "]").ToLocalChecked();
     }
   } else {
     result = Nan::Null();
@@ -154,6 +156,15 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
   XMappingEvent eventMap = {MappingNotify, 0, false, manager->xDisplay, 0, MappingKeyboard, 0, 0};
   XRefreshKeyboardMapping(&eventMap);
 
+  XkbStateRec xkbState;
+  XkbGetState(manager->xDisplay, XkbUseCoreKbd, &xkbState);
+  uint keyboardBaseState = 0x0000;
+  if (xkbState.group == 1) {
+    keyboardBaseState = 0x2000;
+  } else if (xkbState.group == 2) {
+    keyboardBaseState = 0x4000;
+  }
+
   // Set up an event to reuse across CharacterForNativeCode calls
   XEvent event;
   memset(&event, 0, sizeof(XEvent));
@@ -168,8 +179,8 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
     if (dom3Code && xkbKeycode > 0x0000) {
       v8::Local<v8::String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
-      v8::Local<v8::Value> unmodified = CharacterForNativeCode(manager->xInputContext, keyEvent, xkbKeycode, 0);
-      v8::Local<v8::Value> withShift = CharacterForNativeCode(manager->xInputContext, keyEvent, xkbKeycode, ShiftMask);
+      v8::Local<v8::Value> unmodified = CharacterForNativeCode(manager->xInputContext, keyEvent, xkbKeycode, keyboardBaseState);
+      v8::Local<v8::Value> withShift = CharacterForNativeCode(manager->xInputContext, keyEvent, xkbKeycode, keyboardBaseState | ShiftMask);
 
       if (unmodified->IsString() || withShift->IsString()) {
         v8::Local<v8::Object> entry = Nan::New<v8::Object>();
