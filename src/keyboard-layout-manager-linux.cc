@@ -4,6 +4,7 @@
 #include <X11/Xutil.h>
 #include <X11/extensions/XKBrules.h>
 #include <cwctype>
+#include <cctype>
 
 void KeyboardLayoutManager::Init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
   Nan::HandleScope scope;
@@ -68,18 +69,13 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   Window window;
   int revert_to;
   XGetInputFocus(xDisplay, &window, &revert_to);
-  if (!window) {
-    Nan::ThrowError("Could not find foreground window.");
-    return;
-  }
-
-  xInputContext = XCreateIC(
-    xInputMethod, XNInputStyle, bestMatchStyle, XNClientWindow, window,
-    XNFocusWindow, window, NULL
-  );
-  if (!xInputContext) {
-    Nan::ThrowError("Could not create an input context.");
-    return;
+  if (window != BadRequest) {
+    xInputContext = XCreateIC(
+      xInputMethod, XNInputStyle, bestMatchStyle, XNClientWindow, window,
+      XNFocusWindow, window, NULL
+    );
+  } else {
+    xInputContext = nullptr;
   }
 }
 
@@ -136,13 +132,22 @@ v8::Local<v8::Value> CharacterForNativeCode(XIC xInputContext, XKeyEvent *keyEve
   keyEvent->keycode = xkbKeycode;
   keyEvent->state = state;
 
-  wchar_t characters[2];
-  int count = XwcLookupString(xInputContext, keyEvent, characters, 2, NULL, NULL);
-
-  if (count > 0 && !std::iswcntrl(characters[0])) {
-    return Nan::New<v8::String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
-  } else {
-    return Nan::Null();
+  if (xInputContext) {
+    wchar_t characters[2];
+    int count = XwcLookupString(xInputContext, keyEvent, characters, 2, NULL, NULL);
+    if (count > 0 && !std::iswcntrl(characters[0])) {
+      return Nan::New<v8::String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
+    } else {
+      return Nan::Null();
+    }
+  } else { // fallback for headless systems
+    char characters[2];
+    int count = XLookupString(keyEvent, characters, 2, NULL, NULL);
+    if (count > 0 && !std::iscntrl(characters[0])) {
+      return Nan::New<v8::String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
+    } else {
+      return Nan::Null();
+    }
   }
 }
 
