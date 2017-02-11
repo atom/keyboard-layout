@@ -32,7 +32,7 @@ NAN_METHOD(KeyboardLayoutManager::New) {
   return;
 }
 
-KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : xInputContext{nullptr}, callback{callback} {
+KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : xInputContext{nullptr}, xInputMethod{nullptr}, callback{callback} {
   xDisplay = XOpenDisplay("");
   if (!xDisplay) {
     Nan::ThrowError("Could not connect to X display.");
@@ -75,8 +75,14 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : xInputCo
 }
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
-  XDestroyIC(xInputContext);
-  XCloseIM(xInputMethod);
+  if (xInputContext) {
+    XDestroyIC(xInputContext);
+  }
+
+  if (xInputMethod) {
+    XCloseIM(xInputMethod);
+  }
+
   XCloseDisplay(xDisplay);
   delete callback;
 };
