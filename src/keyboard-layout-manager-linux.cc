@@ -32,7 +32,7 @@ NAN_METHOD(KeyboardLayoutManager::New) {
   return;
 }
 
-KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback(callback) {
+KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : xInputContext{nullptr}, xInputMethod{nullptr}, callback{callback} {
   xDisplay = XOpenDisplay("");
   if (!xDisplay) {
     Nan::ThrowError("Could not connect to X display.");
@@ -41,13 +41,11 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
 
   xInputMethod = XOpenIM(xDisplay, 0, 0, 0);
   if (!xInputMethod) {
-    Nan::ThrowError("Could not create an input method.");
     return;
   }
 
   XIMStyles* styles = 0;
   if (XGetIMValues(xInputMethod, XNQueryInputStyle, &styles, NULL) || !styles) {
-    Nan::ThrowError("Could not retrieve input styles.");
     return;
   }
 
@@ -62,7 +60,6 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
   }
   XFree(styles);
   if (!bestMatchStyle) {
-    Nan::ThrowError("Could not retrieve input styles.");
     return;
   }
 
@@ -74,14 +71,18 @@ KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback
       xInputMethod, XNInputStyle, bestMatchStyle, XNClientWindow, window,
       XNFocusWindow, window, NULL
     );
-  } else {
-    xInputContext = nullptr;
   }
 }
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
-  XDestroyIC(xInputContext);
-  XCloseIM(xInputMethod);
+  if (xInputContext) {
+    XDestroyIC(xInputContext);
+  }
+
+  if (xInputMethod) {
+    XCloseIM(xInputMethod);
+  }
+
   XCloseDisplay(xDisplay);
   delete callback;
 };
@@ -140,7 +141,9 @@ v8::Local<v8::Value> CharacterForNativeCode(XIC xInputContext, XKeyEvent *keyEve
     } else {
       return Nan::Null();
     }
-  } else { // fallback for headless systems
+  } else {
+    // Graceful fallback for systems where no window is open or no input context
+    // can be found.
     char characters[2];
     int count = XLookupString(keyEvent, characters, 2, NULL, NULL);
     if (count > 0 && !std::iscntrl(characters[0])) {
