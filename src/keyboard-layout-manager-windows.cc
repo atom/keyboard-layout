@@ -151,6 +151,26 @@ Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanC
   wchar_t characters[5];
   int count = ToUnicodeEx(keyCode, scanCode, keyboardState, characters, 5, 0, keyboardLayout);
 
+  // The check to detect and skip running this function for dead keys does not
+  // account for modifier state. For layouts that map dead keys to AltGraph or
+  // Shift-AltGraph we still have to detect and clear the key out of the
+  // kernel-mode keyboard buffer so the keymap for subsequent keys is correctly
+  // translated and not affected by the dead key.
+  if (count == -1) { // Dead key
+    // Dead keys are not cleared if both AltGraph and Shift is held down so
+    // we clear this keyboard state to ensure that it is cleared correctly.
+    keyboardState[VK_SHIFT] = 0x0;
+    keyboardState[VK_MENU] = 0x0;
+    keyboardState[VK_CONTROL] = 0x0;
+
+    // Clear dead key out of kernel-mode keyboard buffer so subsequent translations are not affected
+    UINT spaceKeyCode = MapVirtualKeyEx(SPACE_SCAN_CODE, MAPVK_VSC_TO_VK, keyboardLayout);
+    ToUnicodeEx(spaceKeyCode, SPACE_SCAN_CODE, keyboardState, characters, 5, 0, keyboardLayout);
+
+    // Don't translate dead keys
+    return Nan::Null();
+  }
+
   if (count > 0 && !std::iswcntrl(characters[0])) {
     return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
   } else {
