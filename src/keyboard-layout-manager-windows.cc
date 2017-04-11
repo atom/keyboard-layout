@@ -169,9 +169,7 @@ Local<Value> CharacterForNativeCode(HKL keyboardLayout, UINT keyCode, UINT scanC
 
     // Don't translate dead keys
     return Nan::Null();
-  }
-
-  if (count > 0 && !std::iswcntrl(characters[0])) {
+  } else if (count > 0 && !std::iswcntrl(characters[0])) {
     return Nan::New<String>(reinterpret_cast<const uint16_t *>(characters), count).ToLocalChecked();
   } else {
     return Nan::Null();
