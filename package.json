@@ -20,7 +20,7 @@
     }
   ],
   "dependencies": {
-    "event-kit": "^1.0.0",
+    "event-kit": "^2.0.0",
     "nan": "^2.0.0"
   },
   "devDependencies": {
