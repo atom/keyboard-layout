@@ -93,7 +93,7 @@ void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   Nan::HandleScope scope;
   KeyboardLayoutManager* manager = Nan::ObjectWrap::Unwrap<KeyboardLayoutManager>(info.Holder());
-  v8::Handle<v8::Value> result;
+  v8::Local<v8::Value> result;
 
   XkbRF_VarDefsRec vdr;
   char *tmp = NULL;
@@ -155,7 +155,7 @@ v8::Local<v8::Value> CharacterForNativeCode(XIC xInputContext, XKeyEvent *keyEve
 }
 
 NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
-  v8::Handle<v8::Object> result = Nan::New<v8::Object>();
+  v8::Local<v8::Object> result = Nan::New<v8::Object>();
   KeyboardLayoutManager* manager = Nan::ObjectWrap::Unwrap<KeyboardLayoutManager>(info.Holder());
   v8::Local<v8::String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
   v8::Local<v8::String> withShiftKey = Nan::New("withShift").ToLocalChecked();
