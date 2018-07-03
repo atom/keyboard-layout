@@ -3,9 +3,9 @@
 
 #include "nan.h"
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__)
 #include <X11/Xlib.h>
-#endif // __linux__
+#endif // __linux__ || __FreeBSD__
 
 class KeyboardLayoutManager : public Nan::ObjectWrap {
  public:
@@ -21,7 +21,7 @@ class KeyboardLayoutManager : public Nan::ObjectWrap {
   static NAN_METHOD(GetInstalledKeyboardLanguages);
   static NAN_METHOD(GetCurrentKeymap);
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__)
   Display *xDisplay;
   XIC xInputContext;
   XIM xInputMethod;
