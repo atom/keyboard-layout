@@ -10,9 +10,7 @@ os:
   - osx
 
 env:
-  - 
   - CC=clang CXX=clang++ npm_config_clang=1
-
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]];
