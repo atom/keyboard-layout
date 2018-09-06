@@ -1,3 +1,5 @@
+image: Visual Studio 2015
+
 environment:
   matrix:
     - nodejs_version: "6"
@@ -10,7 +12,7 @@ platform:
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - npm --msvs_version=2015 install
+  - npm install
 
 test_script:
   - node -e "console.log(`${process.version} ${process.arch} ${process.platform}`)"
