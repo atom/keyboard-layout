@@ -3,6 +3,7 @@
   "version": "2.0.14",
   "description": "Read and observe the current keyboard layout on OS X.",
   "main": "./lib/keyboard-layout",
+  "types": "./lib/keyboard-layout.d.ts",
   "scripts": {
     "test": "jasmine-focused --captureExceptions --forceexit spec"
   },
