@@ -7,22 +7,20 @@
 #include <string>
 #include <cctype>
 
-using namespace v8;
-
-void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
+NAN_MODULE_INIT(KeyboardLayoutManager::Init) {
   Nan::HandleScope scope;
-  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
-  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
+  v8::Local<v8::FunctionTemplate> newTemplate = Nan::New<v8::FunctionTemplate>(KeyboardLayoutManager::New);
+  newTemplate->SetClassName(Nan::New<v8::String>("KeyboardLayoutManager").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
 
-  Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
+  v8::Local<v8::ObjectTemplate> proto = newTemplate->PrototypeTemplate();
 
   Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
   Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
   Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
 
-  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
+  Nan::Set(target, Nan::New("exports").ToLocalChecked(), Nan::GetFunction(newTemplate).ToLocalChecked());
 }
 
 NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
@@ -30,7 +28,7 @@ NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
 NAN_METHOD(KeyboardLayoutManager::New) {
   Nan::HandleScope scope;
 
-  Local<Function> callbackHandle = info[0].As<Function>();
+  v8::Local<v8::Function> callbackHandle = info[0].As<v8::Function>();
   Nan::Callback *callback = new Nan::Callback(callbackHandle);
 
   KeyboardLayoutManager *manager = new KeyboardLayoutManager(callback);
@@ -68,7 +66,7 @@ KeyboardLayoutManager::~KeyboardLayoutManager() {
 };
 
 void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
-  callback->Call(0, NULL);
+  Nan::Call(*callback, 0, NULL);
 }
 
 NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
@@ -101,10 +99,10 @@ NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
       ret.push_back(str);
     }
 
-    Local<Array> result = Nan::New<Array>(ret.size());
+    v8::Local<v8::Array> result = Nan::New<v8::Array>(ret.size());
     for (size_t i = 0; i < ret.size(); ++i) {
        const std::string& lang = ret[i];
-       result->Set(i, Nan::New<String>(lang.data(), lang.size()).ToLocalChecked());
+       Nan::Set(result, i, Nan::New<v8::String>(lang.data(), lang.size()).ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -138,7 +136,7 @@ struct KeycodeMapEntry {
 
 #include "keycode_converter_data.inc"
 
-Local<Value> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt16 virtualKeyCode, EventModifiers modifiers) {
+v8::Local<v8::Value> CharacterForNativeCode(const UCKeyboardLayout* keyboardLayout, UInt16 virtualKeyCode, EventModifiers modifiers) {
   // See https://developer.apple.com/reference/coreservices/1390584-uckeytranslate?language=objc
   UInt32 modifierKeyState = (modifiers >> 8) & 0xFF;
   UInt32 deadKeyState = 0;
@@ -190,32 +188,32 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
   const UCKeyboardLayout* keyboardLayout = reinterpret_cast<const UCKeyboardLayout*>(CFDataGetBytePtr(layoutData));
 
-  Local<Object> result = Nan::New<Object>();
-  Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
-  Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
-  Local<String> withAltGraphKey = Nan::New("withAltGraph").ToLocalChecked();
-  Local<String> withAltGraphShiftKey = Nan::New("withAltGraphShift").ToLocalChecked();
+  v8::Local<v8::Object> result = Nan::New<v8::Object>();
+  v8::Local<v8::String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
+  v8::Local<v8::String> withShiftKey = Nan::New("withShift").ToLocalChecked();
+  v8::Local<v8::String> withAltGraphKey = Nan::New("withAltGraph").ToLocalChecked();
+  v8::Local<v8::String> withAltGraphShiftKey = Nan::New("withAltGraphShift").ToLocalChecked();
 
   size_t keyCodeMapSize = sizeof(keyCodeMap) / sizeof(keyCodeMap[0]);
   for (size_t i = 0; i < keyCodeMapSize; i++) {
     const char *dom3Code = keyCodeMap[i].dom3Code;
     int virtualKeyCode = keyCodeMap[i].virtualKeyCode;
     if (dom3Code && virtualKeyCode < 0xffff) {
-      Local<String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
+      v8::Local<v8::String> dom3CodeKey = Nan::New(dom3Code).ToLocalChecked();
 
-      Local<Value> unmodified = CharacterForNativeCode(keyboardLayout, virtualKeyCode, 0);
-      Local<Value> withShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit));
-      Local<Value> withAltGraph = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << optionKeyBit));
-      Local<Value> withAltGraphShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit) | (1 << optionKeyBit));
+      v8::Local<v8::Value> unmodified = CharacterForNativeCode(keyboardLayout, virtualKeyCode, 0);
+      v8::Local<v8::Value> withShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit));
+      v8::Local<v8::Value> withAltGraph = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << optionKeyBit));
+      v8::Local<v8::Value> withAltGraphShift = CharacterForNativeCode(keyboardLayout, virtualKeyCode, (1 << shiftKeyBit) | (1 << optionKeyBit));
 
       if (unmodified->IsString() || withShift->IsString() || withAltGraph->IsString() || withAltGraphShift->IsString()) {
-        Local<Object> entry = Nan::New<Object>();
-        entry->Set(unmodifiedKey, unmodified);
-        entry->Set(withShiftKey, withShift);
-        entry->Set(withAltGraphKey, withAltGraph);
-        entry->Set(withAltGraphShiftKey, withAltGraphShift);
+        v8::Local<v8::Object> entry = Nan::New<v8::Object>();
+        Nan::Set(entry, unmodifiedKey, unmodified);
+        Nan::Set(entry, withShiftKey, withShift);
+        Nan::Set(entry, withAltGraphKey, withAltGraph);
+        Nan::Set(entry, withAltGraphShiftKey, withAltGraphShift);
 
-        result->Set(dom3CodeKey, entry);
+        Nan::Set(result, dom3CodeKey, entry);
       }
     }
   }
