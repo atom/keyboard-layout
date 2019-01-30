@@ -9,7 +9,7 @@
 
 using namespace v8;
 
-void KeyboardLayoutManager::Init(Handle<Object> exports, Handle<Object> module) {
+void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
   Nan::HandleScope scope;
   Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
   newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
@@ -190,7 +190,7 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
   const UCKeyboardLayout* keyboardLayout = reinterpret_cast<const UCKeyboardLayout*>(CFDataGetBytePtr(layoutData));
 
-  Handle<Object> result = Nan::New<Object>();
+  Local<Object> result = Nan::New<Object>();
   Local<String> unmodifiedKey = Nan::New("unmodified").ToLocalChecked();
   Local<String> withShiftKey = Nan::New("withShift").ToLocalChecked();
   Local<String> withAltGraphKey = Nan::New("withAltGraph").ToLocalChecked();

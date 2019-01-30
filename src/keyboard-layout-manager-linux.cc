@@ -6,7 +6,7 @@
 #include <cwctype>
 #include <cctype>
 
-void KeyboardLayoutManager::Init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> module) {
+void KeyboardLayoutManager::Init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
   Nan::HandleScope scope;
   v8::Local<v8::FunctionTemplate> newTemplate = Nan::New<v8::FunctionTemplate>(KeyboardLayoutManager::New);
   newTemplate->SetClassName(Nan::New<v8::String>("KeyboardLayoutManager").ToLocalChecked());
