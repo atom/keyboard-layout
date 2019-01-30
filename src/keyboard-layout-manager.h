@@ -9,7 +9,7 @@
 
 class KeyboardLayoutManager : public Nan::ObjectWrap {
  public:
-  static void Init(v8::Local<v8::Object> target, v8::Local<v8::Object> module);
+  static NAN_MODULE_INIT(Init);
   void HandleKeyboardLayoutChanged();
 
  private:
