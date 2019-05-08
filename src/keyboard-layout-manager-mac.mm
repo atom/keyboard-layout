@@ -22,7 +22,8 @@ void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
   Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
 
-  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
+  Nan::Set(module, Nan::New("exports").ToLocalChecked(),
+    Nan::GetFunction(newTemplate).ToLocalChecked());
 }
 
 NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
@@ -104,7 +105,7 @@ NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
     Local<Array> result = Nan::New<Array>(ret.size());
     for (size_t i = 0; i < ret.size(); ++i) {
        const std::string& lang = ret[i];
-       result->Set(i, Nan::New<String>(lang.data(), lang.size()).ToLocalChecked());
+       Nan::Set(result, i, Nan::New<String>(lang.data(), lang.size()).ToLocalChecked());
     }
 
     info.GetReturnValue().Set(result);
@@ -210,12 +211,12 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
       if (unmodified->IsString() || withShift->IsString() || withAltGraph->IsString() || withAltGraphShift->IsString()) {
         Local<Object> entry = Nan::New<Object>();
-        entry->Set(unmodifiedKey, unmodified);
-        entry->Set(withShiftKey, withShift);
-        entry->Set(withAltGraphKey, withAltGraph);
-        entry->Set(withAltGraphShiftKey, withAltGraphShift);
+        Nan::Set(entry, unmodifiedKey, unmodified);
+        Nan::Set(entry, withShiftKey, withShift);
+        Nan::Set(entry, withAltGraphKey, withAltGraph);
+        Nan::Set(entry, withAltGraphShiftKey, withAltGraphShift);
 
-        result->Set(dom3CodeKey, entry);
+        Nan::Set(result, dom3CodeKey, entry);
       }
     }
   }

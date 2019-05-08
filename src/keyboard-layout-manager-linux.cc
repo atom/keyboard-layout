@@ -16,7 +16,9 @@ void KeyboardLayoutManager::Init(v8::Local<v8::Object> exports, v8::Local<v8::Ob
   Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLayout); // NB:  Intentionally mapped to same stub
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
   Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
-  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
+
+  Nan::Set(module, Nan::New("exports").ToLocalChecked(),
+    Nan::GetFunction(newTemplate).ToLocalChecked());
 }
 
 NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
@@ -192,9 +194,9 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
       if (unmodified->IsString() || withShift->IsString()) {
         v8::Local<v8::Object> entry = Nan::New<v8::Object>();
-        entry->Set(unmodifiedKey, unmodified);
-        entry->Set(withShiftKey, withShift);
-        result->Set(dom3CodeKey, entry);
+        Nan::Set(entry, unmodifiedKey, unmodified);
+        Nan::Set(entry, withShiftKey, withShift);
+        Nan::Set(result, dom3CodeKey, entry);
       }
     }
   }
