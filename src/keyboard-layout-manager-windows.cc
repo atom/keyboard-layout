@@ -42,6 +42,12 @@ HKL GetForegroundWindowHKL() {
 
 void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
   Nan::HandleScope scope;
+
+  // Once Nan supports Node v12, remove this.
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  // End remove after Nan supports Node v12
+
   Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
   newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
@@ -52,8 +58,10 @@ void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
   Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
 
-  Nan::Set(module, Nan::New("exports").ToLocalChecked(),
-    Nan::GetFunction(newTemplate).ToLocalChecked());
+  // Note: Once NAN supports Node v12, change this to:
+  // Nan::Set(module, Nan::New("exports").ToLocalChecked(),
+  //   (Nan::GetFunction(newTemplate)).ToLocalChecked());
+  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction(context).ToLocalChecked());
 }
 
 NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
