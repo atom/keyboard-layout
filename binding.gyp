@@ -2,6 +2,9 @@
   "targets": [
     {
       "target_name": "keyboard-layout-manager",
+      "sources": [
+        "src/keyboard-layout-manager.cc"
+      ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
         "chrome_headers",

@@ -6,35 +6,7 @@
 #include <cwctype>
 #include <cctype>
 
-void KeyboardLayoutManager::Init(v8::Local<v8::Object> exports, v8::Local<v8::Object> module) {
-  Nan::HandleScope scope;
-  v8::Local<v8::FunctionTemplate> newTemplate = Nan::New<v8::FunctionTemplate>(KeyboardLayoutManager::New);
-  newTemplate->SetClassName(Nan::New<v8::String>("KeyboardLayoutManager").ToLocalChecked());
-  newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-  v8::Local<v8::ObjectTemplate> proto = newTemplate->PrototypeTemplate();
-  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
-  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLayout); // NB:  Intentionally mapped to same stub
-  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
-  Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
-
-  Nan::Set(module, Nan::New("exports").ToLocalChecked(),
-    Nan::GetFunction(newTemplate).ToLocalChecked());
-}
-
-NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
-
-NAN_METHOD(KeyboardLayoutManager::New) {
-  Nan::HandleScope scope;
-
-  v8::Local<v8::Function> callbackHandle = info[0].As<v8::Function>();
-  Nan::Callback *callback = new Nan::Callback(callbackHandle);
-
-  KeyboardLayoutManager *manager = new KeyboardLayoutManager(callback);
-  manager->Wrap(info.This());
-  return;
-}
-
-KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : xInputContext{nullptr}, xInputMethod{nullptr}, callback{callback} {
+KeyboardLayoutManager::KeyboardLayoutManager(v8::Isolate *isolate, Nan::Callback *callback) : xInputContext{nullptr}, xInputMethod{nullptr}, isolate_(isolate), callback{callback} {
   xDisplay = XOpenDisplay("");
   if (!xDisplay) {
     Nan::ThrowError("Could not connect to X display.");
@@ -114,6 +86,10 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLayout) {
   info.GetReturnValue().Set(result);
 
   return;
+}
+
+NAN_METHOD(KeyboardLayoutManager::GetCurrentKeyboardLanguage) {
+  return GetCurrentKeyboardLayout(info);
 }
 
 NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
