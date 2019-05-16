@@ -42,6 +42,12 @@ HKL GetForegroundWindowHKL() {
 
 void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
   Nan::HandleScope scope;
+
+  // Once Nan supports Node v12, remove this.
+  v8::Isolate* isolate = v8::Isolate::GetCurrent();
+  v8::Local<v8::Context> context = isolate->GetCurrentContext();
+  // End remove after Nan supports Node v12
+
   Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
   newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
   newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
@@ -52,7 +58,10 @@ void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
   Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
   Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
 
-  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction());
+  // Note: Once NAN supports Node v12, change this to:
+  // Nan::Set(module, Nan::New("exports").ToLocalChecked(),
+  //   (Nan::GetFunction(newTemplate)).ToLocalChecked());
+  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction(context).ToLocalChecked());
 }
 
 NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
@@ -119,7 +128,7 @@ NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {
     wstr.assign(buf);
 
     std::string str = ToUTF8(wstr);
-    result->Set(i, Nan::New<String>(str.data(), str.size()).ToLocalChecked());
+    Nan::Set(result, i, Nan::New<String>(str.data(), str.size()).ToLocalChecked());
   }
 
   delete[] layouts;
@@ -209,12 +218,12 @@ NAN_METHOD(KeyboardLayoutManager::GetCurrentKeymap) {
 
       if (unmodified->IsString() || withShift->IsString() || withAltGraph->IsString() || withAltGraphShift->IsString()) {
         Local<Object> entry = Nan::New<Object>();
-        entry->Set(unmodifiedKey, unmodified);
-        entry->Set(withShiftKey, withShift);
-        entry->Set(withAltGraphKey, withAltGraph);
-        entry->Set(withAltGraphShiftKey, withAltGraphShift);
+        Nan::Set(entry, unmodifiedKey, unmodified);
+        Nan::Set(entry, withShiftKey, withShift);
+        Nan::Set(entry, withAltGraphKey, withAltGraph);
+        Nan::Set(entry, withAltGraphShiftKey, withAltGraphShift);
 
-        result->Set(dom3CodeKey, entry);
+        Nan::Set(result, dom3CodeKey, entry);
       }
     }
   }
