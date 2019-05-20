@@ -40,45 +40,7 @@ HKL GetForegroundWindowHKL() {
   return GetKeyboardLayout(dwThreadId);
 }
 
-void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
-  Nan::HandleScope scope;
-
-  // Once Nan supports Node v12, remove this.
-  v8::Isolate* isolate = v8::Isolate::GetCurrent();
-  v8::Local<v8::Context> context = isolate->GetCurrentContext();
-  // End remove after Nan supports Node v12
-
-  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
-  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
-  newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-  Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
-
-  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
-  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
-  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
-  Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
-
-  // Note: Once NAN supports Node v12, change this to:
-  // Nan::Set(module, Nan::New("exports").ToLocalChecked(),
-  //   (Nan::GetFunction(newTemplate)).ToLocalChecked());
-  module->Set(Nan::New("exports").ToLocalChecked(), newTemplate->GetFunction(context).ToLocalChecked());
-}
-
-NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
-
-NAN_METHOD(KeyboardLayoutManager::New) {
-  Nan::HandleScope scope;
-
-  Local<Function> callbackHandle = info[0].As<Function>();
-  Nan::Callback *callback = new Nan::Callback(callbackHandle);
-
-  KeyboardLayoutManager *manager = new KeyboardLayoutManager(callback);
-  manager->Wrap(info.This());
-  return;
-}
-
-KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback(callback) {
-}
+KeyboardLayoutManager::KeyboardLayoutManager(v8::Isolate *isolate, Nan::Callback *callback) : isolate_(isolate), callback(callback) {}
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
   delete callback;

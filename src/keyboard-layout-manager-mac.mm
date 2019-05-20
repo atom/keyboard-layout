@@ -9,36 +9,6 @@
 
 using namespace v8;
 
-void KeyboardLayoutManager::Init(Local<Object> exports, Local<Object> module) {
-  Nan::HandleScope scope;
-  Local<FunctionTemplate> newTemplate = Nan::New<FunctionTemplate>(KeyboardLayoutManager::New);
-  newTemplate->SetClassName(Nan::New<String>("KeyboardLayoutManager").ToLocalChecked());
-  newTemplate->InstanceTemplate()->SetInternalFieldCount(1);
-
-  Local<ObjectTemplate> proto = newTemplate->PrototypeTemplate();
-
-  Nan::SetMethod(proto, "getCurrentKeyboardLayout", KeyboardLayoutManager::GetCurrentKeyboardLayout);
-  Nan::SetMethod(proto, "getCurrentKeyboardLanguage", KeyboardLayoutManager::GetCurrentKeyboardLanguage);
-  Nan::SetMethod(proto, "getInstalledKeyboardLanguages", KeyboardLayoutManager::GetInstalledKeyboardLanguages);
-  Nan::SetMethod(proto, "getCurrentKeymap", KeyboardLayoutManager::GetCurrentKeymap);
-
-  Nan::Set(module, Nan::New("exports").ToLocalChecked(),
-    Nan::GetFunction(newTemplate).ToLocalChecked());
-}
-
-NODE_MODULE(keyboard_layout_manager, KeyboardLayoutManager::Init)
-
-NAN_METHOD(KeyboardLayoutManager::New) {
-  Nan::HandleScope scope;
-
-  Local<Function> callbackHandle = info[0].As<Function>();
-  Nan::Callback *callback = new Nan::Callback(callbackHandle);
-
-  KeyboardLayoutManager *manager = new KeyboardLayoutManager(callback);
-  manager->Wrap(info.This());
-  return;
-}
-
 uv_loop_t *loop = uv_default_loop();
 uv_async_t async;
 
@@ -51,25 +21,51 @@ static void asyncSendHandler(uv_async_t *handle) {
   (static_cast<KeyboardLayoutManager *>(handle->data))->HandleKeyboardLayoutChanged();
 }
 
-KeyboardLayoutManager::KeyboardLayoutManager(Nan::Callback *callback) : callback(callback) {
+static void RemoveCFObserver(void *arg) {
+  auto manager = static_cast<KeyboardLayoutManager*>(arg);
+  CFNotificationCenterRemoveObserver(
+    CFNotificationCenterGetDistributedCenter(),
+    manager,
+    kTISNotifySelectedKeyboardInputSourceChanged,
+    NULL
+  );
+}
+
+KeyboardLayoutManager::KeyboardLayoutManager(v8::Isolate *isolate, Nan::Callback *callback) : isolate_(isolate), callback(callback) {
   uv_async_init(loop, &async, (uv_async_cb) asyncSendHandler);
 
   CFNotificationCenterAddObserver(
       CFNotificationCenterGetDistributedCenter(),
       this,
-      &notificationHandler,
+      notificationHandler,
       kTISNotifySelectedKeyboardInputSourceChanged,
       NULL,
       CFNotificationSuspensionBehaviorDeliverImmediately
   );
+
+#if NODE_MAJOR_VERSION >= 10
+  node::AddEnvironmentCleanupHook(
+    isolate,
+    RemoveCFObserver,
+    const_cast<void*>(static_cast<const void*>(nullptr)));
+#endif
 }
 
 KeyboardLayoutManager::~KeyboardLayoutManager() {
+#if NODE_MAJOR_VERSION >= 10
+  node::RemoveEnvironmentCleanupHook(
+    isolate(),
+    RemoveCFObserver,
+    const_cast<void*>(static_cast<const void*>(this))
+  );
+#endif
+  RemoveCFObserver(this);
   delete callback;
 };
 
 void KeyboardLayoutManager::HandleKeyboardLayoutChanged() {
-  callback->Call(0, NULL);
+  Nan::AsyncResource async_resource("keyboard_layout:HandleKeyboardLayoutChanged");
+  callback->Call(0, NULL, &async_resource);
 }
 
 NAN_METHOD(KeyboardLayoutManager::GetInstalledKeyboardLanguages) {

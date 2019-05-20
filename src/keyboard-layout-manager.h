@@ -9,17 +9,19 @@
 
 class KeyboardLayoutManager : public Nan::ObjectWrap {
  public:
-  static void Init(v8::Local<v8::Object> target, v8::Local<v8::Object> module);
   void HandleKeyboardLayoutChanged();
 
- private:
-  KeyboardLayoutManager(Nan::Callback *callback);
-  ~KeyboardLayoutManager();
   static NAN_METHOD(New);
   static NAN_METHOD(GetCurrentKeyboardLayout);
   static NAN_METHOD(GetCurrentKeyboardLanguage);
   static NAN_METHOD(GetInstalledKeyboardLanguages);
   static NAN_METHOD(GetCurrentKeymap);
+
+ private:
+  KeyboardLayoutManager(v8::Isolate* isolate, Nan::Callback *callback);
+  ~KeyboardLayoutManager();
+
+  v8::Isolate* isolate() { return isolate_; }
 
 #if defined(__linux__) || defined(__FreeBSD__)
   Display *xDisplay;
@@ -27,6 +29,7 @@ class KeyboardLayoutManager : public Nan::ObjectWrap {
   XIM xInputMethod;
 #endif
 
+  v8::Isolate *isolate_;
   Nan::Callback *callback;
 };
 
