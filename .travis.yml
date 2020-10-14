@@ -22,7 +22,7 @@ before_install:
 addons:
   apt:
     packages:
-      - clang-3.3
+      - clang-3.5
       - libx11-dev
       - libxkbfile-dev
 
