@@ -31,6 +31,7 @@
             },
           },
           'msvs_disabled_warnings': [
+            4309,  # 'static_cast': truncation of constant value
             4018,  # signed/unsigned mismatch
             4244,  # conversion from 'type1' to 'type2', possible loss of data
             4267,  # conversion from 'size_t' to 'type', possible loss of data
