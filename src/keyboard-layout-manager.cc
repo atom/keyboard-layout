@@ -26,7 +26,6 @@ NODE_MODULE(keyboard_layout_manager, init)
 
 NAN_METHOD(KeyboardLayoutManager::New) {
   Nan::HandleScope scope;
-
   Local<Function> callbackHandle = info[0].As<Function>();
   Nan::Callback *callback = new Nan::Callback(callbackHandle);
 

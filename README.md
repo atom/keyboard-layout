@@ -1,7 +1,5 @@
 # keyboard-layout
-[![macOS Build Status](https://travis-ci.org/atom/keyboard-layout.svg?branch=master)](https://travis-ci.org/atom/keyboard-layout)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/rk8wooeyh689apgd/branch/master?svg=true)](https://ci.appveyor.com/project/Atom/keyboard-layout)
-[![Dependency Status](https://david-dm.org/atom/keyboard-layout/status.svg)](https://david-dm.org/atom/keyboard-layout)
+[![CI](https://github.com/atom/keyboard-layout/actions/workflows/ci.yml/badge.svg)](https://github.com/atom/keyboard-layout/actions/workflows/ci.yml)
 
 Read and observe the current keyboard layout.
 
